@@ -1,0 +1,123 @@
+/** Invest page — bilingual content. */
+export const invest = {
+  fr: {
+    hero: { eyebrow: 'Harmonia Invest', titleA: "L'investissement immobilier", titleH: 'clé en main', titleB: 'à Marrakech' },
+    intro: {
+      tag: 'Harmonia Invest',
+      titleA: 'Investissez à Marrakech.',
+      titleH: 'Nous gérons tout.',
+      titleB: 'Vous percevez vos revenus.',
+      desc: 'De la recherche du bien à la gestion locative complète, Harmonia vous accompagne à chaque étape de votre investissement immobilier à Marrakech.',
+      checks: [
+        'Sélection et acquisition du bien',
+        'Rénovation et décoration par nos architectes',
+        'Mise en location et gestion complète',
+        'Marge de gestion garantie',
+        'Reporting mensuel et transparence totale',
+      ],
+      kpis: [
+        { n: '200K€+', l: 'Budget min.' },
+        { n: '70%+', l: 'Occupation' },
+        { n: '20%', l: 'Marge garantie' },
+        { n: '5 ans', l: 'Accompagnement' },
+      ],
+      exampleTitle: 'Simulation Concrète',
+      rows: [
+        { l: 'Investissement total', v: '200 000 €', g: false },
+        { l: "Frais d'acquisition", v: '15 000 €', g: false },
+        { l: 'Rénovation & Décoration', v: '35 000 €', g: false },
+        { l: 'Budget disponible net', v: '150 000 €', g: false },
+        { l: 'Revenu mensuel cible', v: '2 500 €', g: true },
+        { l: "Taux d'occupation estimé", v: '70%', g: false },
+        { l: 'Revenu annuel estimé', v: '21 000 €', g: true },
+        { l: 'Rendement brut', v: '10.5%', g: true },
+      ],
+      highlight: 'Marge de gestion Harmonia : 20%',
+    },
+    process: {
+      eyebrow: 'Notre Processus',
+      titleA: 'Un accompagnement',
+      titleH: 'A à Z',
+      sub: 'De la première rencontre à votre premier loyer.',
+      steps: [
+        { n: '01', t: 'Consultation', d: 'Étude de votre profil investisseur, de vos objectifs de rendement et de votre budget disponible.' },
+        { n: '02', t: 'Sélection du Bien', d: 'Identification et sélection des meilleures opportunités immobilières à Marrakech selon vos critères.' },
+        { n: '03', t: 'Acquisition & Travaux', d: 'Accompagnement juridique, notarial, et coordination des travaux de rénovation et décoration.' },
+        { n: '04', t: 'Gestion & Revenus', d: 'Mise en location immédiate, gestion complète, et versement mensuel de vos revenus locatifs.' },
+      ],
+    },
+    forWho: {
+      eyebrow: 'Pour Qui ?',
+      titleA: 'Harmonia Invest',
+      titleH: 'vous correspond si…',
+      cards: [
+        { t: 'Expatriés & Diaspora', d: "Vous souhaitez investir au Maroc depuis l'étranger sans être présent sur place." },
+        { t: 'Investisseurs Débutants', d: 'Votre premier investissement immobilier — nous vous guidons pas à pas.' },
+        { t: 'Investisseurs Expérimentés', d: 'Vous cherchez à diversifier votre portefeuille avec un rendement attractif.' },
+        { t: 'Retraités & Patrimoniaux', d: 'Vous voulez vous constituer une rente locative stable à long terme.' },
+      ],
+      cta: "Démarrer mon projet d'investissement",
+    },
+  },
+  en: {
+    hero: { eyebrow: 'Harmonia Invest', titleA: 'Turnkey real-estate', titleH: 'investment', titleB: 'in Marrakech' },
+    intro: {
+      tag: 'Harmonia Invest',
+      titleA: 'Invest in Marrakech.',
+      titleH: 'We handle everything.',
+      titleB: 'You collect your returns.',
+      desc: 'From sourcing the property to full rental management, Harmonia supports you at every step of your real-estate investment in Marrakech.',
+      checks: [
+        'Property selection and acquisition',
+        'Renovation and design by our architects',
+        'Listing and full management',
+        'Guaranteed management margin',
+        'Monthly reporting and full transparency',
+      ],
+      kpis: [
+        { n: '€200K+', l: 'Min. budget' },
+        { n: '70%+', l: 'Occupancy' },
+        { n: '20%', l: 'Guaranteed margin' },
+        { n: '5 years', l: 'Support' },
+      ],
+      exampleTitle: 'Concrete Simulation',
+      rows: [
+        { l: 'Total investment', v: '€200,000', g: false },
+        { l: 'Acquisition fees', v: '€15,000', g: false },
+        { l: 'Renovation & Design', v: '€35,000', g: false },
+        { l: 'Net available budget', v: '€150,000', g: false },
+        { l: 'Target monthly income', v: '€2,500', g: true },
+        { l: 'Estimated occupancy', v: '70%', g: false },
+        { l: 'Estimated annual income', v: '€21,000', g: true },
+        { l: 'Gross yield', v: '10.5%', g: true },
+      ],
+      highlight: 'Harmonia management margin: 20%',
+    },
+    process: {
+      eyebrow: 'Our Process',
+      titleA: 'End-to-end',
+      titleH: 'support',
+      sub: 'From the first meeting to your first rent.',
+      steps: [
+        { n: '01', t: 'Consultation', d: 'Assessment of your investor profile, your return objectives and your available budget.' },
+        { n: '02', t: 'Property Selection', d: 'Identification and selection of the best real-estate opportunities in Marrakech to your criteria.' },
+        { n: '03', t: 'Acquisition & Works', d: 'Legal and notarial support, and coordination of renovation and design works.' },
+        { n: '04', t: 'Management & Income', d: 'Immediate listing, full management, and monthly payment of your rental income.' },
+      ],
+    },
+    forWho: {
+      eyebrow: 'For Whom?',
+      titleA: 'Harmonia Invest',
+      titleH: 'is right for you if…',
+      cards: [
+        { t: 'Expats & Diaspora', d: 'You want to invest in Morocco from abroad without being on site.' },
+        { t: 'First-time Investors', d: 'Your first real-estate investment — we guide you step by step.' },
+        { t: 'Experienced Investors', d: 'You want to diversify your portfolio with an attractive yield.' },
+        { t: 'Retirees & Wealth', d: 'You want to build a stable long-term rental income.' },
+      ],
+      cta: 'Start my investment project',
+    },
+  },
+};
+
+export type InvestContent = (typeof invest)['fr'];

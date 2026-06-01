@@ -1,0 +1,2 @@
+/** Checkout · validation layer */
+export {};
