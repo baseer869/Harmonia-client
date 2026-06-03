@@ -22,10 +22,10 @@ interface CartCtx {
   isOpen: boolean;
   cartCount: number;
   cartTotal: number;
-  addToCart: (item: Omit<CartItem, 'qty'>) => void;
-  removeFromCart: (id: number) => void;
+  addToCart: (item: Omit<CartItem, 'qty'>, quantity?: number) => void;
+  removeFromCart: (id: string) => void;
   clearCart: () => void;
-  changeQty: (id: number, delta: number) => void;
+  changeQty: (id: string, delta: number) => void;
   setCurrency: (c: Currency) => void;
   openCart: () => void;
   closeCart: () => void;
@@ -49,26 +49,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
     storage.set(STORAGE_KEY, cart);
   }, [cart]);
 
-  const addToCart = useCallback((item: Omit<CartItem, 'qty'>) => {
+  const addToCart = useCallback((item: Omit<CartItem, 'qty'>, quantity = 1) => {
     setCart((prev) => {
+      // Same service + date + people + option + extras → bump qty, not a new row.
       const existing = prev.find((c) => c.id === item.id);
       if (existing) {
         return prev.map((c) =>
-          c.id === item.id ? { ...c, qty: c.qty + 1 } : c,
+          c.id === item.id ? { ...c, qty: c.qty + quantity } : c,
         );
       }
-      return [...prev, { ...item, qty: 1 }];
+      return [...prev, { ...item, qty: quantity }];
     });
     setIsOpen(true);
   }, []);
 
-  const removeFromCart = useCallback((id: number) => {
+  const removeFromCart = useCallback((id: string) => {
     setCart((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
   const clearCart = useCallback(() => setCart([]), []);
 
-  const changeQty = useCallback((id: number, delta: number) => {
+  const changeQty = useCallback((id: string, delta: number) => {
     setCart((prev) =>
       prev
         .map((i) => (i.id === id ? { ...i, qty: i.qty + delta } : i))

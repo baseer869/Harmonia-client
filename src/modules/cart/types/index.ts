@@ -10,7 +10,7 @@ export interface CartBooking {
 }
 
 export interface CartItem {
-  id: number;
+  id: string;
   name: string;
   sub: string;
   price: number; // MAD (base currency) — display estimate only

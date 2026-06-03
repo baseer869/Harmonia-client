@@ -40,7 +40,9 @@ export function ServiceDetail({ service }: { service: PublicService }) {
       ? 'Sur devis'
       : `${money(service.priceCents, service.currency)} ${MODE_SUFFIX[service.priceMode]}`.trim();
 
-  const img = resolveAssetUrl(service.coverUrl);
+  // One photo serves both: fall back to whichever is present.
+  const photo = service.coverUrl ?? service.thumbUrl;
+  const img = resolveAssetUrl(photo);
   const thumb = resolveAssetUrl(service.thumbUrl ?? service.coverUrl);
 
   const { addToCart } = useCart();
@@ -68,25 +70,38 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const handleAdd = () => {
     const people = needsPeople ? Math.max(1, parseInt(persons, 10)) : 1;
     const selectedExtras = service.extras.filter((e) => extras.includes(e.name));
-    // Display estimate only; the authoritative total is computed server-side.
-    const estimate = Math.round(service.priceCents / 100) * people * qty;
-    addToCart({
-      id: Date.now(),
-      name: title,
-      sub: `${date || t.dateConfirm} · ${persons} ${
-        Number(persons) > 1 ? t.persons : t.person
-      }${option ? ` · ${option}` : ''}`,
-      price: estimate,
-      img: thumb,
-      currency: service.currency,
-      booking: {
-        serviceId: service.id,
-        people: needsPeople ? people : undefined,
-        optionName: option || undefined,
-        scheduledAt: date ? new Date(date).toISOString() : undefined,
-        extras: selectedExtras.map((e) => ({ name: e.name, priceCents: e.priceCents })),
+    // Stable id: identical service + date + people + option + extras collapses
+    // into one cart line (qty increments) instead of stacking duplicate rows.
+    const lineId = [
+      service.id,
+      date,
+      needsPeople ? people : '',
+      option,
+      selectedExtras.map((e) => e.name).sort().join('+'),
+    ].join('|');
+    // Per-unit display estimate; the cart multiplies by qty and the authoritative
+    // total is computed server-side at checkout.
+    const estimate = Math.round(service.priceCents / 100) * people;
+    addToCart(
+      {
+        id: lineId,
+        name: title,
+        sub: `${date || t.dateConfirm} · ${persons} ${
+          Number(persons) > 1 ? t.persons : t.person
+        }${option ? ` · ${option}` : ''}`,
+        price: estimate,
+        img: thumb,
+        currency: service.currency,
+        booking: {
+          serviceId: service.id,
+          people: needsPeople ? people : undefined,
+          optionName: option || undefined,
+          scheduledAt: date ? new Date(date).toISOString() : undefined,
+          extras: selectedExtras.map((e) => ({ name: e.name, priceCents: e.priceCents })),
+        },
       },
-    });
+      qty,
+    );
   };
 
   return (
