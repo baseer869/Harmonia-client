@@ -1,7 +1,6 @@
-import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 
-import { ServiceDetail, SERVICE_MAP } from '@/modules/services';
+import { ServiceDetailLoader } from '@/modules/services';
 
 export default async function ServicePage({
   params,
@@ -11,8 +10,6 @@ export default async function ServicePage({
   const { locale, service } = await params;
   setRequestLocale(locale);
 
-  const svc = SERVICE_MAP[service];
-  if (!svc) notFound();
-
-  return <ServiceDetail svc={svc} id={service} />;
+  // `service` is the live service slug (e.g. "hammam-ritual").
+  return <ServiceDetailLoader slug={service} />;
 }

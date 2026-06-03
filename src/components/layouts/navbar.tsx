@@ -76,19 +76,8 @@ export function Navbar() {
 
         <div className="nav-right">
           <LocaleSwitcher />
-          <LocalizedLink
-            href="/contact"
-            style={{
-              fontSize: 10,
-              letterSpacing: 3,
-              textTransform: 'uppercase',
-              color: 'var(--cream)',
-            }}
-          >
+          <LocalizedLink href="/contact" className="nav-cta">
             {dict.nav.contact}
-          </LocalizedLink>
-          <LocalizedLink href="/reserver" className="nav-cta">
-            {dict.pages.voyageurs.bookCta}
           </LocalizedLink>
         </div>
 
@@ -132,8 +121,8 @@ export function Navbar() {
         </div>
         <div className="mob-cta" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <LocaleSwitcher />
-          <LocalizedLink href="/reserver" style={{ flex: 1 }}>
-            {dict.pages.voyageurs.bookCta}
+          <LocalizedLink href="/contact" style={{ flex: 1 }}>
+            {dict.nav.contact}
           </LocalizedLink>
         </div>
       </div>

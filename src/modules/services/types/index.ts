@@ -60,6 +60,8 @@ export interface PublicService {
   durationMinutes: number | null;
   languages: string[];
   featured: boolean;
+  ratingCached: number;
+  reviewCount: number;
   included: PublicServiceIncluded[];
   info: PublicServiceInfo[];
   options: PublicServiceOption[];

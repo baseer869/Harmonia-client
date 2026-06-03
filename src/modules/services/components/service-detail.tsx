@@ -1,42 +1,91 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useI18n } from '@/i18n/provider';
 import { LocalizedLink } from '@/components/ui';
+import { money, resolveAssetUrl } from '@/lib/format';
 import { useCart } from '@/modules/cart';
-import type { ServiceData } from '../types';
+
+import type { PublicService } from '../types';
 
 /**
- * Service detail + booking. Bilingual UI chrome via the dictionary; the deep
- * body content (description, included, reviews) comes from the temporary static
- * dataset and will be replaced by /api/public/services data.
+ * Service detail + booking — ORIGINAL design, now driven by a live service from
+ * the admin public API. The booking card builds a cart line that carries the
+ * real booking payload (serviceId, date, people, option, extras); pricing is
+ * confirmed server-side at checkout.
  */
-export function ServiceDetail({ svc, id }: { svc: ServiceData; id: string }) {
-  const { dict } = useI18n();
+
+const TYPE_LABEL: Record<PublicService['type'], string> = {
+  EXPERIENCE: 'Expérience',
+  TRANSFER: 'Transfert',
+  PRODUCT: 'Produit',
+  QUOTE: 'Sur devis',
+};
+const MODE_SUFFIX: Record<PublicService['priceMode'], string> = {
+  PER_PERSON: '/ pers.',
+  PER_TRIP: '/ trajet',
+  FIXED: '',
+  ON_QUOTE: '',
+};
+
+export function ServiceDetail({ service }: { service: PublicService }) {
+  const { dict, locale } = useI18n();
   const t = dict.pages.service;
-  const cat = (dict.categories as Record<string, { name: string; price: string }>)[id];
-  const title = cat?.name ?? svc.title;
-  const priceLabel = cat?.price ?? svc.price;
+
+  const title = service.title;
+  const catLabel = service.tags[0] ?? TYPE_LABEL[service.type];
+  const priceLabel =
+    service.priceMode === 'ON_QUOTE'
+      ? 'Sur devis'
+      : `${money(service.priceCents, service.currency)} ${MODE_SUFFIX[service.priceMode]}`.trim();
+
+  const img = resolveAssetUrl(service.coverUrl);
+  const thumb = resolveAssetUrl(service.thumbUrl ?? service.coverUrl);
 
   const { addToCart } = useCart();
   const [tab, setTab] = useState(0);
   const [qty, setQty] = useState(1);
   const [date, setDate] = useState('');
   const [persons, setPersons] = useState('2');
+  const [option, setOption] = useState(service.options[0]?.name ?? '');
+  const [extras, setExtras] = useState<string[]>([]);
 
-  const stars = '★'.repeat(Math.round(parseFloat(svc.rating)));
+  const needsPeople = service.priceMode === 'PER_PERSON';
+  const personOptions = useMemo(() => {
+    const max = service.maxPeople ?? 10;
+    const base = [1, 2, 3, 4, 5, 6, 8, 10].filter((n) => n <= max);
+    return base.length ? base : [1];
+  }, [service.maxPeople]);
+
+  const hasReviews = service.reviewCount > 0;
+  const stars = '★'.repeat(Math.max(0, Math.round(service.ratingCached))) || '—';
   const tabs = [t.tabDescription, t.tabIncluded, t.tabInfo, t.tabReviews];
 
+  const toggleExtra = (name: string) =>
+    setExtras((cur) => (cur.includes(name) ? cur.filter((n) => n !== name) : [...cur, name]));
+
   const handleAdd = () => {
+    const people = needsPeople ? Math.max(1, parseInt(persons, 10)) : 1;
+    const selectedExtras = service.extras.filter((e) => extras.includes(e.name));
+    // Display estimate only; the authoritative total is computed server-side.
+    const estimate = Math.round(service.priceCents / 100) * people * qty;
     addToCart({
       id: Date.now(),
       name: title,
       sub: `${date || t.dateConfirm} · ${persons} ${
         Number(persons) > 1 ? t.persons : t.person
-      }`,
-      price: svc.priceNum * Math.max(1, parseInt(persons, 10)) * qty,
-      img: svc.thumb,
+      }${option ? ` · ${option}` : ''}`,
+      price: estimate,
+      img: thumb,
+      currency: service.currency,
+      booking: {
+        serviceId: service.id,
+        people: needsPeople ? people : undefined,
+        optionName: option || undefined,
+        scheduledAt: date ? new Date(date).toISOString() : undefined,
+        extras: selectedExtras.map((e) => ({ name: e.name, priceCents: e.priceCents })),
+      },
     });
   };
 
@@ -44,7 +93,7 @@ export function ServiceDetail({ svc, id }: { svc: ServiceData; id: string }) {
     <div style={{ paddingTop: 'var(--nav-h)', background: 'var(--black)', minHeight: '100vh' }}>
       <div className="page-hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="page-hero-img" src={svc.img} alt={title} />
+        <img className="page-hero-img" src={img} alt={title} />
         <div className="page-hero-overlay" />
         <div className="page-hero-content">
           <div className="page-hero-eyebrow">{dict.pages.voyageurs.heroTitle}</div>
@@ -67,15 +116,20 @@ export function ServiceDetail({ svc, id }: { svc: ServiceData; id: string }) {
         <div style={{ background: 'var(--dark2)' }}>
           <div className="svc-title-area">
             <div className="svc-breadcrumb">
-              <LocalizedLink href="/voyageurs">{dict.nav.travelers}</LocalizedLink> ›{' '}
-              {svc.cat}
+              <LocalizedLink href="/voyageurs">{dict.nav.travelers}</LocalizedLink> › {catLabel}
             </div>
-            <span className="svc-cat-tag">{svc.cat}</span>
+            <span className="svc-cat-tag">{catLabel}</span>
             <h2 className="svc-title">{title}</h2>
             <div className="svc-rating-row">
               <span className="svc-stars">{stars}</span>
               <span className="svc-rating-count">
-                {svc.rating} / 5 · {svc.reviews}
+                {hasReviews
+                  ? `${service.ratingCached.toFixed(1)} / 5 · ${service.reviewCount} ${
+                      locale === 'en' ? 'reviews' : 'avis'
+                    }`
+                  : locale === 'en'
+                    ? 'New'
+                    : 'Nouveau'}
               </span>
               <span className="svc-price-badge">{priceLabel}</span>
             </div>
@@ -94,46 +148,55 @@ export function ServiceDetail({ svc, id }: { svc: ServiceData; id: string }) {
           </div>
 
           <div style={{ display: tab === 0 ? 'block' : 'none', padding: '40px 48px' }}>
-            <p className="svc-desc-text">{svc.desc}</p>
-            <div
-              style={{
-                fontSize: 10,
-                letterSpacing: 3,
-                color: 'var(--gold)',
-                textTransform: 'uppercase',
-                marginBottom: 14,
-              }}
-            >
-              {t.optionsTitle}
-            </div>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {svc.options.map((o) => (
-                <li
-                  key={o}
-                  style={{ fontSize: 13, color: 'var(--text-light)', paddingLeft: 16, position: 'relative' }}
+            <p className="svc-desc-text">{service.description}</p>
+            {service.options.length > 0 && (
+              <>
+                <div
+                  style={{
+                    fontSize: 10,
+                    letterSpacing: 3,
+                    color: 'var(--gold)',
+                    textTransform: 'uppercase',
+                    marginBottom: 14,
+                  }}
                 >
-                  <span style={{ position: 'absolute', left: 0, color: 'var(--gold)' }}>›</span>
-                  {o}
-                </li>
-              ))}
-            </ul>
-            <div className="svc-seo-tags" style={{ marginTop: 24 }}>
-              {svc.tags.map((tag) => (
-                <span key={tag} className="svc-seo-tag">
-                  {tag}
-                </span>
-              ))}
-            </div>
+                  {t.optionsTitle}
+                </div>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {service.options.map((o) => (
+                    <li
+                      key={o.name}
+                      style={{ fontSize: 13, color: 'var(--text-light)', paddingLeft: 16, position: 'relative' }}
+                    >
+                      <span style={{ position: 'absolute', left: 0, color: 'var(--gold)' }}>›</span>
+                      {o.name}
+                      {o.priceDeltaCents
+                        ? ` (+${money(o.priceDeltaCents, service.currency)})`
+                        : ''}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {service.tags.length > 0 && (
+              <div className="svc-seo-tags" style={{ marginTop: 24 }}>
+                {service.tags.map((tag) => (
+                  <span key={tag} className="svc-seo-tag">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div style={{ display: tab === 1 ? 'block' : 'none', padding: '40px 48px' }}>
             <div className="included-grid">
-              {svc.included.map(([incTitle, desc]) => (
-                <div key={incTitle} className="inc-item">
+              {service.included.map((inc) => (
+                <div key={inc.title} className="inc-item">
                   <span className="inc-check">✓</span>
                   <div className="inc-text">
-                    <strong>{incTitle}</strong>
-                    {desc}
+                    <strong>{inc.title}</strong>
+                    {inc.description}
                   </div>
                 </div>
               ))}
@@ -142,68 +205,78 @@ export function ServiceDetail({ svc, id }: { svc: ServiceData; id: string }) {
 
           <div style={{ display: tab === 2 ? 'block' : 'none', padding: '40px 48px' }}>
             <div className="info-grid">
-              {svc.info.map(([label, val]) => (
-                <div key={label} className="info-box">
-                  <div className="info-box-label">{label}</div>
-                  <div className="info-box-val">{val}</div>
+              {service.info.map((i) => (
+                <div key={i.label} className="info-box">
+                  <div className="info-box-label">{i.label}</div>
+                  <div className="info-box-val">{i.value}</div>
                 </div>
               ))}
             </div>
           </div>
 
           <div style={{ display: tab === 3 ? 'block' : 'none', padding: '40px 48px' }}>
-            <div className="reviews-list">
-              {svc.reviewsList.map((r) => (
-                <div key={r.a} className="review-card">
-                  <div className="review-header">
-                    <span className="review-author">{r.a}</span>
-                    <span className="review-date">{r.d}</span>
-                  </div>
-                  <div className="review-stars">{'★'.repeat(r.s)}</div>
-                  <p className="review-text">{r.t}</p>
-                </div>
-              ))}
-            </div>
+            <p style={{ color: 'var(--text-light)', fontSize: 14 }}>
+              {locale === 'en' ? 'No reviews yet.' : 'Aucun avis pour le moment.'}
+            </p>
           </div>
         </div>
 
         <div className="svc-sidebar">
           <div className="booking-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="booking-card-img" src={svc.thumb} alt={title} />
+            <img className="booking-card-img" src={thumb} alt={title} />
             <div className="booking-card-body">
               <div className="booking-title">{title}</div>
               <div className="booking-price">{priceLabel}</div>
               <div className="booking-form">
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
-                <select value={persons} onChange={(e) => setPersons(e.target.value)}>
-                  {[1, 2, 3, 4, 5, 6, 8, 10].map((n) => (
-                    <option key={n} value={n}>
-                      {n} {n > 1 ? t.persons : t.person}
-                    </option>
-                  ))}
-                </select>
-                <select defaultValue={svc.options[0]}>
-                  {svc.options.map((o) => (
-                    <option key={o}>{o}</option>
-                  ))}
-                </select>
+                {service.requiresDate && (
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
+                )}
+                {needsPeople && (
+                  <select value={persons} onChange={(e) => setPersons(e.target.value)}>
+                    {personOptions.map((n) => (
+                      <option key={n} value={n}>
+                        {n} {n > 1 ? t.persons : t.person}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {service.options.length > 0 && (
+                  <select value={option} onChange={(e) => setOption(e.target.value)}>
+                    {service.options.map((o) => (
+                      <option key={o.name} value={o.name}>
+                        {o.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
-              {svc.extras.length > 0 && (
+              {service.extras.length > 0 && (
                 <>
                   <div className="booking-divider" />
                   <div className="extras-title">{t.extrasTitle}</div>
-                  {svc.extras.map(([name, price]) => (
-                    <div key={name} className="extra-item">
-                      <span className="extra-name">{name}</span>
-                      <span className="extra-price">{price}</span>
-                      <button className="extra-add">{t.add}</button>
-                    </div>
-                  ))}
+                  {service.extras.map((x) => {
+                    const on = extras.includes(x.name);
+                    return (
+                      <div key={x.name} className="extra-item">
+                        <span className="extra-name">{x.name}</span>
+                        <span className="extra-price">
+                          +{money(x.priceCents, service.currency)}
+                        </span>
+                        <button
+                          className="extra-add"
+                          onClick={() => toggleExtra(x.name)}
+                          style={on ? { background: 'var(--gold)', color: 'var(--black)' } : undefined}
+                        >
+                          {on ? '✓' : t.add}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </>
               )}
               <div className="booking-divider" />

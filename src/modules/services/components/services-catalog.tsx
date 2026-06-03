@@ -86,7 +86,7 @@ export function ServicesCatalog() {
         return (
           <LocalizedLink
             key={s.id}
-            href={`/reserver?service=${s.slug}`}
+            href={`/voyageurs/${s.slug}`}
             className="cat-card"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}

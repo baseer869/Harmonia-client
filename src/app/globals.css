@@ -288,6 +288,14 @@ img { display: block; width: 100%; object-fit: cover; }
 .booking-form input:focus, .booking-form select:focus { border-bottom-color: var(--gold); }
 .booking-form input::placeholder, .booking-form textarea::placeholder { color: var(--text-muted); font-size: 11.5px; }
 .booking-form select option { background: var(--dark2); }
+/* Native date picker on the dark theme: render dark + show the calendar icon. */
+.booking-form input[type="date"] { color-scheme: dark; cursor: pointer; }
+.booking-form input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.85); opacity: 0.7; cursor: pointer; }
+.booking-form input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+/* Cart contact fields (guest checkout). */
+.panier-contact-input { width: 100%; padding: 12px 14px; background: var(--dark3); border: 1px solid rgba(201,168,76,.18); color: var(--cream); font-size: 13px; font-family: 'Lato', sans-serif; outline: none; transition: border-color .3s; }
+.panier-contact-input:focus { border-color: var(--gold); }
+.panier-contact-input::placeholder { color: var(--text-muted); }
 .booking-lang-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 4px; }
 .lang-btn { padding: 7px 14px; border: 1px solid rgba(201,168,76,.25); background: none; color: var(--text-muted); font-size: 10px; letter-spacing: 2px; cursor: pointer; transition: .25s; text-transform: uppercase; font-family: 'Lato', sans-serif; }
 .lang-btn.active, .lang-btn:hover { border-color: var(--gold); color: var(--gold); }

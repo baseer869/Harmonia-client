@@ -24,6 +24,7 @@ interface CartCtx {
   cartTotal: number;
   addToCart: (item: Omit<CartItem, 'qty'>) => void;
   removeFromCart: (id: number) => void;
+  clearCart: () => void;
   changeQty: (id: number, delta: number) => void;
   setCurrency: (c: Currency) => void;
   openCart: () => void;
@@ -65,6 +66,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
+  const clearCart = useCallback(() => setCart([]), []);
+
   const changeQty = useCallback((id: number, delta: number) => {
     setCart((prev) =>
       prev
@@ -95,6 +98,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         cartTotal,
         addToCart,
         removeFromCart,
+        clearCart,
         changeQty,
         setCurrency,
         openCart,
