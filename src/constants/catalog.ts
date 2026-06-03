@@ -18,5 +18,5 @@ export const CATEGORY_CARDS: CategoryCard[] = [
   { id: 'shopping', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80' },
   { id: 'evenements', img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=80' },
   { id: 'packs', img: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&q=80' },
-  { id: 'cadeaux', img: 'https://images.unsplash.com/photo-1611006174913-c8d9e5d5b1a2?w=600&q=80' },
+  { id: 'cadeaux', img: 'https://images.unsplash.com/photo-1531761535209-180857e963b9?w=600&q=80' },
 ];

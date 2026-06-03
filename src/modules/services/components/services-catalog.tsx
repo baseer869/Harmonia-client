@@ -13,7 +13,7 @@ const API_URL =
 const ASSET_BASE = API_URL.replace(/\/api\/public\/?$/, '');
 
 const FALLBACK_IMG =
-  'https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=1200&q=80';
+  'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1200&q=80';
 
 /** Admin uploads are served from the admin origin; absolute URLs pass through. */
 function resolveImg(url: string | null): string {

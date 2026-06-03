@@ -13,7 +13,7 @@ const ASSET_BASE = API_URL.replace(/\/api\/public\/?$/, '');
  *  admin origin; null falls back to a neutral placeholder. */
 export function resolveAssetUrl(url: string | null | undefined): string {
   const FALLBACK =
-    'https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=1200&q=80';
+    'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1200&q=80';
   if (!url) return FALLBACK;
   return url.startsWith('http') ? url : `${ASSET_BASE}${url}`;
 }

@@ -5,7 +5,7 @@ import { ServicesCatalog } from '@/modules/services';
 import { getDictionary, isLocale, defaultLocale } from '@/i18n';
 
 const HERO_IMG =
-  'https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=1600&q=85';
+  'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1600&q=85';
 
 export default async function VoyageursPage({
   params,

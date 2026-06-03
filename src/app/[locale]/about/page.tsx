@@ -6,7 +6,7 @@ import { defaultLocale, isLocale } from '@/i18n';
 import { about } from '@/content/about';
 
 const HERO_IMG =
-  'https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=1600&q=85';
+  'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1600&q=85';
 const STORY_IMG =
   'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=800&q=85';
 
