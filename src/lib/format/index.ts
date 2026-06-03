@@ -15,7 +15,9 @@ export function resolveAssetUrl(url: string | null | undefined): string {
   const FALLBACK =
     'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1200&q=80';
   if (!url) return FALLBACK;
-  return url.startsWith('http') ? url : `${ASSET_BASE}${url}`;
+  // Absolute URLs and inline data URLs pass through; admin /uploads get the origin.
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  return `${ASSET_BASE}${url}`;
 }
 
 /** Format integer minor units as a localized currency string. */

@@ -18,7 +18,8 @@ const FALLBACK_IMG =
 /** Admin uploads are served from the admin origin; absolute URLs pass through. */
 function resolveImg(url: string | null): string {
   if (!url) return FALLBACK_IMG;
-  return url.startsWith('http') ? url : `${ASSET_BASE}${url}`;
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  return `${ASSET_BASE}${url}`;
 }
 
 const MODE_SUFFIX: Record<PublicService['priceMode'], string> = {
