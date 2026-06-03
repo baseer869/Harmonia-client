@@ -22,7 +22,7 @@ interface CartCtx {
   isOpen: boolean;
   cartCount: number;
   cartTotal: number;
-  addToCart: (item: Omit<CartItem, 'qty'>, quantity?: number) => void;
+  addToCart: (item: Omit<CartItem, 'qty'>, quantity?: number, mode?: 'add' | 'set') => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
   changeQty: (id: string, delta: number) => void;
@@ -49,19 +49,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     storage.set(STORAGE_KEY, cart);
   }, [cart]);
 
-  const addToCart = useCallback((item: Omit<CartItem, 'qty'>, quantity = 1) => {
-    setCart((prev) => {
-      // Same service + date + people + option + extras → bump qty, not a new row.
-      const existing = prev.find((c) => c.id === item.id);
-      if (existing) {
-        return prev.map((c) =>
-          c.id === item.id ? { ...c, qty: c.qty + quantity } : c,
-        );
-      }
-      return [...prev, { ...item, qty: quantity }];
-    });
-    setIsOpen(true);
-  }, []);
+  const addToCart = useCallback(
+    (item: Omit<CartItem, 'qty'>, quantity = 1, mode: 'add' | 'set' = 'add') => {
+      setCart((prev) => {
+        // Same service + date + people + option + extras → one row.
+        // 'add' bumps the qty; 'set' replaces it (used by "Book now").
+        const existing = prev.find((c) => c.id === item.id);
+        if (existing) {
+          const qty = mode === 'set' ? quantity : existing.qty + quantity;
+          return prev.map((c) => (c.id === item.id ? { ...c, qty } : c));
+        }
+        return [...prev, { ...item, qty: quantity }];
+      });
+      if (mode === 'add') setIsOpen(true);
+    },
+    [],
+  );
 
   const removeFromCart = useCallback((id: string) => {
     setCart((prev) => prev.filter((i) => i.id !== id));

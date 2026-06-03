@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { useI18n } from '@/i18n/provider';
+import { useRouter } from '@/i18n/navigation';
 import { LocalizedLink } from '@/components/ui';
 import { money, resolveAssetUrl } from '@/lib/format';
 import { useCart } from '@/modules/cart';
@@ -46,6 +47,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const thumb = resolveAssetUrl(service.thumbUrl ?? service.coverUrl);
 
   const { addToCart } = useCart();
+  const router = useRouter();
   const [tab, setTab] = useState(0);
   const [qty, setQty] = useState(1);
   const [date, setDate] = useState('');
@@ -67,7 +69,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const toggleExtra = (name: string) =>
     setExtras((cur) => (cur.includes(name) ? cur.filter((n) => n !== name) : [...cur, name]));
 
-  const handleAdd = () => {
+  const handleAdd = (checkout: boolean) => {
     const people = needsPeople ? Math.max(1, parseInt(persons, 10)) : 1;
     const selectedExtras = service.extras.filter((e) => extras.includes(e.name));
     // Stable id: identical service + date + people + option + extras collapses
@@ -101,7 +103,10 @@ export function ServiceDetail({ service }: { service: PublicService }) {
         },
       },
       qty,
+      checkout ? 'set' : 'add',
     );
+    // "Book now" → straight to the cart/checkout; "Add to cart" → stay (drawer opens).
+    if (checkout) router.push('/panier');
   };
 
   return (
@@ -309,10 +314,10 @@ export function ServiceDetail({ service }: { service: PublicService }) {
                   +
                 </button>
               </div>
-              <button className="booking-submit" style={{ marginTop: 12 }} onClick={handleAdd}>
+              <button className="booking-submit" style={{ marginTop: 12 }} onClick={() => handleAdd(true)}>
                 {t.bookNow}
               </button>
-              <button className="btn-add-cart" onClick={handleAdd}>
+              <button className="btn-add-cart" onClick={() => handleAdd(false)}>
                 {t.addToCart}
               </button>
               <p className="booking-note">{t.bookingNote}</p>
