@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { useI18n } from '@/i18n/provider';
 import { useRouter } from '@/i18n/navigation';
 import { LocalizedLink } from '@/components/ui';
-import { money, resolveAssetUrl } from '@/lib/format';
+import { money, onImageError, resolveAssetUrl } from '@/lib/format';
 import { useCart } from '@/modules/cart';
 
 import type { PublicService } from '../types';
@@ -81,9 +81,13 @@ export function ServiceDetail({ service }: { service: PublicService }) {
       option,
       selectedExtras.map((e) => e.name).sort().join('+'),
     ].join('|');
-    // Per-unit display estimate; the cart multiplies by qty and the authoritative
-    // total is computed server-side at checkout.
-    const estimate = Math.round(service.priceCents / 100) * people;
+    // Per-unit display estimate (base × people + option delta + add-ons), mirroring
+    // the server formula. The cart multiplies by qty; the authoritative total is
+    // computed server-side at checkout.
+    const optionDelta = service.options.find((o) => o.name === option)?.priceDeltaCents ?? 0;
+    const extrasSum = selectedExtras.reduce((s, e) => s + e.priceCents, 0);
+    const baseCents = needsPeople ? service.priceCents * people : service.priceCents;
+    const estimate = Math.round((baseCents + optionDelta + extrasSum) / 100);
     addToCart(
       {
         id: lineId,
@@ -113,7 +117,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
     <div style={{ paddingTop: 'var(--nav-h)', background: 'var(--black)', minHeight: '100vh' }}>
       <div className="page-hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="page-hero-img" src={img} alt={title} />
+        <img className="page-hero-img" src={img} alt={title} onError={onImageError} />
         <div className="page-hero-overlay" />
         <div className="page-hero-content">
           <div className="page-hero-eyebrow">{dict.pages.voyageurs.heroTitle}</div>
@@ -244,7 +248,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
         <div className="svc-sidebar">
           <div className="booking-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="booking-card-img" src={thumb} alt={title} />
+            <img className="booking-card-img" src={thumb} alt={title} onError={onImageError} />
             <div className="booking-card-body">
               <div className="booking-title">{title}</div>
               <div className="booking-price">{priceLabel}</div>

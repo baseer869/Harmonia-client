@@ -9,12 +9,21 @@ const API_URL =
 /** Origin that serves admin-uploaded assets (everything before /api/public). */
 const ASSET_BASE = API_URL.replace(/\/api\/public\/?$/, '');
 
+/** Neutral placeholder shown when a service has no image (or its image fails). */
+export const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1200&q=80';
+
+/** Swap a broken <img> to the fallback once (no infinite loop). */
+export function onImageError(e: React.SyntheticEvent<HTMLImageElement>) {
+  const img = e.currentTarget;
+  img.onerror = null;
+  img.src = FALLBACK_IMAGE;
+}
+
 /** Resolve an image URL: absolute URLs pass through; admin `/uploads/…` get the
  *  admin origin; null falls back to a neutral placeholder. */
 export function resolveAssetUrl(url: string | null | undefined): string {
-  const FALLBACK =
-    'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1200&q=80';
-  if (!url) return FALLBACK;
+  if (!url) return FALLBACK_IMAGE;
   // Absolute URLs and inline data URLs pass through; admin /uploads get the origin.
   if (url.startsWith('http') || url.startsWith('data:')) return url;
   return `${ASSET_BASE}${url}`;

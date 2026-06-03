@@ -2,7 +2,7 @@
 
 import { useI18n } from '@/i18n/provider';
 import { LocalizedLink, Reveal } from '@/components/ui';
-import { money, resolveAssetUrl } from '@/lib/format';
+import { money, onImageError, resolveAssetUrl } from '@/lib/format';
 import { usePublicServices, type PublicService } from '@/modules/services';
 
 const MODE_SUFFIX: Record<PublicService['priceMode'], string> = {
@@ -32,6 +32,7 @@ export function CatalogPreview() {
           className="cat-card-img"
           src={resolveAssetUrl(s.coverUrl ?? s.thumbUrl)}
           alt={s.title}
+          onError={onImageError}
         />
         <div className="cat-card-overlay" />
         <div className="cat-card-body">

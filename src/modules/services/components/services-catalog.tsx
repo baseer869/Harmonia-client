@@ -2,6 +2,7 @@
 
 import { useI18n } from '@/i18n/provider';
 import { LocalizedLink } from '@/components/ui';
+import { onImageError } from '@/lib/format';
 
 import { usePublicServices } from '../hooks';
 import type { PublicService } from '../types';
@@ -95,6 +96,7 @@ export function ServicesCatalog() {
               className="cat-card-img"
               src={resolveImg(s.coverUrl ?? s.thumbUrl)}
               alt={s.title}
+              onError={onImageError}
             />
             <div className="cat-card-overlay" />
             <div className="cat-card-body">
