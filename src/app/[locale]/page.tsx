@@ -6,6 +6,7 @@ import {
   CatalogPreview,
   InvestPreview,
   TeamSection,
+  TerritorySection,
   ContactSection,
 } from '@/components/sections';
 
@@ -25,6 +26,7 @@ export default async function HomePage({
       <CatalogPreview />
       <InvestPreview />
       <TeamSection />
+      <TerritorySection />
       <ContactSection />
     </>
   );
