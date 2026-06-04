@@ -104,7 +104,7 @@ img { display: block; width: 100%; object-fit: cover; }
 .hero-content { position: relative; z-index: 2; padding: 0 80px 120px; max-width: 780px; animation: fadeUp 1.1s ease both; }
 .hero-badge { display: inline-flex; align-items: center; gap: 12px; border: 1px solid rgba(201,168,76,.5); color: var(--gold); font-size: 9px; letter-spacing: 6px; text-transform: uppercase; padding: 9px 22px; margin-bottom: 36px; animation: fadeIn 1s ease .3s both; }
 .hero-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .3 } }
+@keyframes pulseDot { 0%, 100% { opacity: 1 } 50% { opacity: .3 } }
 .hero-title { font-family: 'Cinzel', serif; font-size: clamp(48px, 7vw, 96px); line-height: .92; color: var(--white); margin-bottom: 16px; }
 .hero-subtitle { font-family: 'Cormorant Garamond', serif; font-size: clamp(20px, 2.5vw, 30px); font-style: italic; color: var(--text-light); margin-bottom: 48px; line-height: 1.4; }
 .hero-btns { display: flex; gap: 18px; flex-wrap: wrap; }
