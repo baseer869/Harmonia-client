@@ -56,7 +56,7 @@ export function CartPage() {
       return;
     }
     createBooking.mutate(
-      { items, customer: { name: name || undefined, email, phone: phone || undefined } },
+      { items, locale, customer: { name: name || undefined, email, phone: phone || undefined } },
       { onSuccess: () => clearCart() },
     );
   };

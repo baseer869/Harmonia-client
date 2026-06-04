@@ -31,6 +31,7 @@ export const guestContactSchema = z.object({
 export const createBookingSchema = z.object({
   items: z.array(bookingItemSchema).min(1, 'Add at least one service.'),
   notes: z.string().max(2000).optional(),
+  locale: z.string().optional(),
   customer: guestContactSchema.optional(),
 });
 

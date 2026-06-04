@@ -17,14 +17,16 @@ interface Paginated<T> {
  * the admin returns — it owns no catalog data and computes no prices.
  */
 export const publicServicesApi = {
-  /** Active services for the current tenant. */
-  async list(): Promise<PublicService[]> {
-    const page = await api.get<Paginated<PublicService>>('/services');
+  /** Active services for the current tenant, localized to `locale`. */
+  async list(locale?: string): Promise<PublicService[]> {
+    const qs = locale ? `?locale=${encodeURIComponent(locale)}` : '';
+    const page = await api.get<Paginated<PublicService>>(`/services${qs}`);
     return page.items;
   },
 
-  /** A single active service by slug (with options/extras). */
-  getBySlug(slug: string): Promise<PublicService> {
-    return api.get<PublicService>(`/services/${slug}`);
+  /** A single active service by slug (with options/extras), localized. */
+  getBySlug(slug: string, locale?: string): Promise<PublicService> {
+    const qs = locale ? `?locale=${encodeURIComponent(locale)}` : '';
+    return api.get<PublicService>(`/services/${slug}${qs}`);
   },
 };
