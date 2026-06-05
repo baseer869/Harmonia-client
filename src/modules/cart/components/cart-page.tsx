@@ -111,7 +111,7 @@ export function CartPage() {
               style={{
                 width: '100%',
                 maxWidth: 420,
-                margin: '8px 0 28px',
+                margin: '8px auto 28px',
                 border: '1px solid rgba(201,168,76,.18)',
                 borderRadius: 12,
                 background: 'rgba(255,255,255,.02)',
