@@ -104,7 +104,10 @@ export function CartPage() {
             <div className="panier-empty-title">
               {en ? 'Request received' : 'Demande envoyée'}
             </div>
-            <p className="panier-empty-sub" style={{ maxWidth: 500 }}>
+            <p
+              className="panier-empty-sub"
+              style={{ maxWidth: 500, margin: '0 auto', textAlign: 'center' }}
+            >
               {en
                 ? 'Thank you. Your reservation request has been sent — our concierge will contact you shortly to confirm availability and arrange payment.'
                 : 'Merci. Votre demande de réservation a été envoyée — notre conciergerie vous contactera prochainement pour confirmer la disponibilité et organiser le paiement.'}
