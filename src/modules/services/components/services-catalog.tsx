@@ -120,58 +120,16 @@
 'use client';
 
 import { useI18n } from '@/i18n/provider';
-import { LocalizedLink } from '@/components/ui';
-import { onImageError } from '@/lib/format';
 
 import { usePublicServices } from '../hooks';
-import type { PublicService } from '../types';
+import { ServiceCard } from './service-card';
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api/public';
-
-const ASSET_BASE = API_URL.replace(/\/api\/public\/?$/, '');
-
-const FALLBACK_IMG =
-  'https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=1200&q=80';
-
-function resolveImg(url: string | null): string {
-  if (!url) return FALLBACK_IMG;
-  if (url.startsWith('http') || url.startsWith('data:')) return url;
-  return `${ASSET_BASE}${url}`;
-}
-
-const MODE_SUFFIX: Record<PublicService['priceMode'], string> = {
-  PER_PERSON: '/ pers.',
-  PER_TRIP: '/ trajet',
-  FIXED: '',
-  ON_QUOTE: '',
-};
-
-function money(cents: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: 0,
-    }).format(cents / 100);
-  } catch {
-    return `${Math.round(cents / 100)} ${currency}`;
-  }
-}
-
-function priceLabel(s: PublicService, fromWord: string): string {
-  if (s.priceMode === 'ON_QUOTE') return 'Sur devis';
-
-  return `${fromWord} ${money(s.priceCents, s.currency)} ${
-    MODE_SUFFIX[s.priceMode]
-  }`.trim();
-}
-
+/**
+ * Full service catalogue grid (voyageurs page). Uses the exact same ServiceCard
+ * as the home "Our Service Catalogue" preview so both stay visually identical.
+ */
 export function ServicesCatalog() {
-  const { dict, locale } = useI18n();
-  const t = dict.pages.voyageurs;
-  const fromWord = locale === 'en' ? 'From' : 'Dès';
-
+  const { locale } = useI18n();
   const { data: services, isLoading, isError, error } = usePublicServices();
 
   if (isLoading) {
@@ -201,46 +159,10 @@ export function ServicesCatalog() {
   }
 
   return (
-    <div className="services-catalog-grid">
-      {services.map((s) => {
-        const items = (
-          s.tags.length ? s.tags : s.included.map((i) => i.title)
-        ).slice(0, 3);
-
-        return (
-          <LocalizedLink
-            key={s.id}
-            href={`/voyageurs/${s.slug}`}
-            className="services-catalog-card"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className="services-catalog-img"
-              src={resolveImg(s.coverUrl ?? s.thumbUrl)}
-              alt={s.title}
-              onError={onImageError}
-            />
-
-            <div className="services-catalog-body">
-              <h3 className="services-catalog-title">{s.title}</h3>
-
-              {items.length > 0 && (
-                <ul className="services-catalog-items">
-                  {items.map((i) => (
-                    <li key={i}>{i}</li>
-                  ))}
-                </ul>
-              )}
-
-              <p className="services-catalog-price">
-                {priceLabel(s, fromWord)}
-              </p>
-
-              <div className="services-catalog-btn">{t.bookCta}</div>
-            </div>
-          </LocalizedLink>
-        );
-      })}
+    <div className="mx-auto grid max-w-[1400px] grid-cols-4 gap-x-[22px] gap-y-[28px] max-[1100px]:grid-cols-3 max-[768px]:grid-cols-2 max-[520px]:grid-cols-1">
+      {services.map((s) => (
+        <ServiceCard key={s.id} service={s} />
+      ))}
     </div>
   );
 }
