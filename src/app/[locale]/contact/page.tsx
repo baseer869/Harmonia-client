@@ -1,6 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 
 import { PageHero } from '@/components/layouts';
+import { TerritorySection } from '@/components/sections';
 import { Reveal } from '@/components/ui';
 import { defaultLocale, isLocale } from '@/i18n';
 import { contact } from '@/content/contact';
@@ -101,6 +102,8 @@ export default async function ContactPage({
           </Reveal>
         </div>
       </section>
+
+      <TerritorySection />
     </>
   );
 }

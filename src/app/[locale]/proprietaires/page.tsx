@@ -1,6 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 
 import { PageHero } from '@/components/layouts';
+import { TerritorySection } from '@/components/sections';
 import { LocalizedLink, Reveal } from '@/components/ui';
 import { defaultLocale, isLocale } from '@/i18n';
 import { proprietaires } from '@/content/proprietaires';
@@ -112,6 +113,8 @@ export default async function ProprietairesPage({
           </LocalizedLink>
         </div>
       </section>
+
+      <TerritorySection />
     </>
   );
 }

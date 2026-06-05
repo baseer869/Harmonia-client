@@ -1,6 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 
 import { PageHero } from '@/components/layouts';
+import { TerritorySection } from '@/components/sections';
 import { LocalizedLink, Reveal } from '@/components/ui';
 import { defaultLocale, isLocale } from '@/i18n';
 import { invest } from '@/content/invest';
@@ -120,6 +121,8 @@ export default async function InvestPage({
           </LocalizedLink>
         </div>
       </section>
+
+      <TerritorySection />
     </>
   );
 }

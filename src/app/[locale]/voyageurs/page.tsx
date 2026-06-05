@@ -1,6 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 
 import { PageHero } from '@/components/layouts';
+import { TerritorySection } from '@/components/sections';
 import { ServicesCatalog } from '@/modules/services';
 import { getDictionary, isLocale, defaultLocale } from '@/i18n';
 
@@ -26,6 +27,8 @@ export default async function VoyageursPage({
         </p>
         <ServicesCatalog />
       </section>
+
+      <TerritorySection />
     </>
   );
 }
