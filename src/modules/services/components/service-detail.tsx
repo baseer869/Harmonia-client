@@ -46,7 +46,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const img = resolveAssetUrl(photo);
   const thumb = resolveAssetUrl(service.thumbUrl ?? service.coverUrl);
 
-  const { addToCart } = useCart();
+  const { addToCart, clearCart } = useCart();
   const router = useRouter();
   const [tab, setTab] = useState(0);
   const [qty, setQty] = useState(1);
@@ -88,29 +88,34 @@ export function ServiceDetail({ service }: { service: PublicService }) {
     const extrasSum = selectedExtras.reduce((s, e) => s + e.priceCents, 0);
     const baseCents = needsPeople ? service.priceCents * people : service.priceCents;
     const estimate = Math.round((baseCents + optionDelta + extrasSum) / 100);
-    addToCart(
-      {
-        id: lineId,
-        name: title,
-        sub: `${date || t.dateConfirm} · ${persons} ${
-          Number(persons) > 1 ? t.persons : t.person
-        }${option ? ` · ${option}` : ''}`,
-        price: estimate,
-        img: thumb,
-        currency: service.currency,
-        booking: {
-          serviceId: service.id,
-          people: needsPeople ? people : undefined,
-          optionName: option || undefined,
-          scheduledAt: date ? new Date(date).toISOString() : undefined,
-          extras: selectedExtras.map((e) => ({ name: e.name, priceCents: e.priceCents })),
-        },
+    const item = {
+      id: lineId,
+      name: title,
+      sub: `${date || t.dateConfirm} · ${persons} ${
+        Number(persons) > 1 ? t.persons : t.person
+      }${option ? ` · ${option}` : ''}`,
+      price: estimate,
+      img: thumb,
+      currency: service.currency,
+      booking: {
+        serviceId: service.id,
+        people: needsPeople ? people : undefined,
+        optionName: option || undefined,
+        scheduledAt: date ? new Date(date).toISOString() : undefined,
+        extras: selectedExtras.map((e) => ({ name: e.name, priceCents: e.priceCents })),
       },
-      qty,
-      checkout ? 'set' : 'add',
-    );
-    // "Book now" → straight to the cart/checkout; "Add to cart" → stay (drawer opens).
-    if (checkout) router.push('/panier');
+    };
+
+    if (checkout) {
+      // "Book now" = express checkout: the cart holds only this selection, so
+      // clicking it again just replaces it (never stacks duplicates).
+      clearCart();
+      addToCart(item, qty, 'set');
+      router.push('/panier');
+    } else {
+      // "Add to cart": same config merges into one line and bumps the quantity.
+      addToCart(item, qty, 'add');
+    }
   };
 
   return (
