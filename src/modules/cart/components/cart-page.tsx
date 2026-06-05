@@ -9,6 +9,17 @@ import { useCreateBooking } from '@/modules/reservations';
 import { useCart } from '../hooks';
 import type { Currency } from '../types';
 
+/** Never surface a raw validation payload (JSON array/object) to the customer. */
+function cleanError(message: string, en: boolean): string {
+  const trimmed = (message ?? '').trim();
+  if (!trimmed || trimmed.startsWith('[') || trimmed.startsWith('{')) {
+    return en
+      ? 'Something went wrong with your request. Please check your details and try again.'
+      : 'Une erreur est survenue. Veuillez vérifier vos informations et réessayer.';
+  }
+  return trimmed;
+}
+
 /** Full cart page (panier) — bilingual; checkout creates a real booking. */
 export function CartPage() {
   const { dict, locale } = useI18n();
@@ -37,6 +48,12 @@ export function CartPage() {
     setFormError(null);
     if (!email.trim()) {
       setFormError(en ? 'Your email is required.' : 'Votre e-mail est requis.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setFormError(
+        en ? 'Please enter a valid email address.' : 'Veuillez saisir une adresse e-mail valide.',
+      );
       return;
     }
     const items = cart
@@ -71,21 +88,86 @@ export function CartPage() {
 
         {booking ? (
           <div className="panier-empty">
-            <div className="panier-empty-icon">✓</div>
-            <div className="panier-empty-title">
-              {en ? 'Booking confirmed' : 'Réservation confirmée'}
+            <div
+              className="panier-empty-icon"
+              style={{
+                color: 'var(--gold)',
+                border: '1px solid rgba(201,168,76,.4)',
+                background: 'rgba(201,168,76,.08)',
+              }}
+            >
+              ✓
             </div>
-            <p className="panier-empty-sub" style={{ maxWidth: 460 }}>
-              {en ? 'Reference' : 'Référence'}{' '}
-              <strong style={{ color: 'var(--gold)' }}>{booking.code}</strong> —{' '}
-              {en ? 'total' : 'total'}{' '}
-              <strong style={{ color: 'var(--gold)' }}>
-                {money(booking.totalCents, booking.currency)}
-              </strong>
-              . {en
-                ? 'Our concierge will contact you to finalize.'
-                : 'Notre conciergerie vous contactera pour finaliser.'}
+            <div className="panier-empty-title">
+              {en ? 'Request received' : 'Demande envoyée'}
+            </div>
+            <p className="panier-empty-sub" style={{ maxWidth: 500 }}>
+              {en
+                ? 'Thank you. Your reservation request has been sent — our concierge will contact you shortly to confirm availability and arrange payment.'
+                : 'Merci. Votre demande de réservation a été envoyée — notre conciergerie vous contactera prochainement pour confirmer la disponibilité et organiser le paiement.'}
             </p>
+
+            <div
+              style={{
+                width: '100%',
+                maxWidth: 420,
+                margin: '8px 0 28px',
+                border: '1px solid rgba(201,168,76,.18)',
+                borderRadius: 12,
+                background: 'rgba(255,255,255,.02)',
+                overflow: 'hidden',
+              }}
+            >
+              {[
+                [en ? 'Reference' : 'Référence', booking.code],
+                [en ? 'Estimated total' : 'Total estimé', money(booking.totalCents, booking.currency)],
+              ].map(([k, v], i) => (
+                <div
+                  key={k}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 16,
+                    padding: '14px 20px',
+                    borderTop: i === 0 ? 'none' : '1px solid rgba(201,168,76,.1)',
+                  }}
+                >
+                  <span style={{ fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                    {k}
+                  </span>
+                  <strong style={{ color: 'var(--gold)', fontFamily: "'Cinzel', serif" }}>{v}</strong>
+                </div>
+              ))}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 16,
+                  padding: '14px 20px',
+                  borderTop: '1px solid rgba(201,168,76,.1)',
+                }}
+              >
+                <span style={{ fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                  {en ? 'Status' : 'Statut'}
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    letterSpacing: 1,
+                    textTransform: 'uppercase',
+                    color: '#d9b44a',
+                    border: '1px solid rgba(217,180,74,.4)',
+                    borderRadius: 999,
+                    padding: '3px 10px',
+                  }}
+                >
+                  {en ? 'Pending confirmation' : 'En attente de confirmation'}
+                </span>
+              </div>
+            </div>
+
             <LocalizedLink href="/voyageurs" className="btn-gold">
               {t.explore}
             </LocalizedLink>
@@ -206,7 +288,7 @@ export function CartPage() {
 
               {(formError || createBooking.isError) && (
                 <p style={{ color: '#e07a7a', fontSize: 12, marginBottom: 10 }}>
-                  {formError ?? (createBooking.error as Error).message}
+                  {formError ?? cleanError((createBooking.error as Error).message, en)}
                 </p>
               )}
 
