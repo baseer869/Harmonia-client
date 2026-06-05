@@ -24,6 +24,7 @@ interface CartCtx {
   cartTotal: number;
   addToCart: (item: Omit<CartItem, 'qty'>, quantity?: number, mode?: 'add' | 'set') => void;
   removeFromCart: (id: string) => void;
+  removeExtra: (id: string, extraName: string) => void;
   clearCart: () => void;
   changeQty: (id: string, delta: number) => void;
   setCurrency: (c: Currency) => void;
@@ -75,6 +76,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  // Remove a single add-on from a cart line and subtract its price from the line.
+  const removeExtra = useCallback((id: string, extraName: string) => {
+    setCart((prev) =>
+      prev.map((c) => {
+        if (c.id !== id || !c.booking) return c;
+        const ex = c.booking.extras.find((e) => e.name === extraName);
+        if (!ex) return c;
+        return {
+          ...c,
+          price: Math.max(0, c.price - Math.round(ex.priceCents / 100)),
+          booking: { ...c.booking, extras: c.booking.extras.filter((e) => e.name !== extraName) },
+        };
+      }),
+    );
+  }, []);
+
   const removeFromCart = useCallback((id: string) => {
     setCart((prev) => prev.filter((i) => i.id !== id));
   }, []);
@@ -111,6 +128,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         cartTotal,
         addToCart,
         removeFromCart,
+        removeExtra,
         clearCart,
         changeQty,
         setCurrency,
