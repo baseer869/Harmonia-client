@@ -14,6 +14,11 @@ export const metadata: Metadata = {
   description:
     'Harmonia Conciergerie — services haut de gamme, gestion locative et expériences sur-mesure à Marrakech, Maroc.',
   keywords: 'conciergerie Marrakech, gestion locative Maroc, services luxe Marrakech',
+
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export function generateStaticParams() {
