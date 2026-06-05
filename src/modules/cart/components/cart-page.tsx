@@ -8,6 +8,7 @@ import { money } from '@/lib/format';
 import { useCreateBooking } from '@/modules/reservations';
 import { useCart } from '../hooks';
 import type { Currency } from '../types';
+import { CartLineConfig } from './cart-line-config';
 
 /** Never surface a raw validation payload (JSON array/object) to the customer. */
 function cleanError(message: string, en: boolean): string {
@@ -31,6 +32,7 @@ export function CartPage() {
     setCurrency,
     removeFromCart,
     removeExtra,
+    removeOption,
     changeQty,
     clearCart,
     cartTotal,
@@ -196,33 +198,11 @@ export function CartPage() {
                     <div className="panier-item-cat">{t.itemCat}</div>
                     <div className="panier-item-name">{item.name}</div>
                     <div className="panier-item-detail">{item.sub}</div>
-                    {item.booking?.optionName && (
-                      <div style={{ fontSize: 12, color: 'var(--gold)', marginTop: 2 }}>
-                        {item.booking.optionName}
-                      </div>
-                    )}
-                    {item.booking?.extras?.length ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>
-                        {item.booking.extras.map((e) => (
-                          <div
-                            key={e.name}
-                            style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}
-                          >
-                            <span style={{ flex: 1 }}>+ {e.name}</span>
-                            <span style={{ color: 'var(--gold)' }}>
-                              MAD {Math.round(e.priceCents / 100).toLocaleString('fr-FR')}
-                            </span>
-                            <button
-                              onClick={() => removeExtra(item.id, e.name)}
-                              aria-label={`remove ${e.name}`}
-                              style={{ color: 'var(--text-muted)', cursor: 'pointer', lineHeight: 1 }}
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
+                    <CartLineConfig
+                      booking={item.booking}
+                      onRemoveOption={() => removeOption(item.id)}
+                      onRemoveExtra={(n) => removeExtra(item.id, n)}
+                    />
                     <div className="panier-item-qty">
                       <button className="panier-qty-btn" onClick={() => changeQty(item.id, -1)}>
                         −

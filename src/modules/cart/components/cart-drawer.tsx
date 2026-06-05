@@ -6,6 +6,7 @@ import { useI18n } from '@/i18n/provider';
 import { LocalizedLink } from '@/components/ui';
 import { useCart } from '../hooks';
 import type { Currency } from '../types';
+import { CartLineConfig } from './cart-line-config';
 
 /** Floating cart button + slide-out drawer (bilingual). */
 export function CartDrawer() {
@@ -19,6 +20,7 @@ export function CartDrawer() {
     closeCart,
     removeFromCart,
     removeExtra,
+    removeOption,
     changeQty,
     setCurrency,
     cartCount,
@@ -84,33 +86,12 @@ export function CartDrawer() {
                 <div className="cart-item-info">
                   <div className="cart-item-name">{item.name}</div>
                   <div className="cart-item-sub">{item.sub || t.item}</div>
-                  {item.booking?.optionName && (
-                    <div style={{ fontSize: 11, color: 'var(--gold)', marginTop: 2 }}>
-                      {item.booking.optionName}
-                    </div>
-                  )}
-                  {item.booking?.extras?.length ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 4 }}>
-                      {item.booking.extras.map((e) => (
-                        <div
-                          key={e.name}
-                          style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-muted)' }}
-                        >
-                          <span style={{ flex: 1 }}>+ {e.name}</span>
-                          <span style={{ color: 'var(--gold)' }}>
-                            MAD {Math.round(e.priceCents / 100).toLocaleString('fr-FR')}
-                          </span>
-                          <button
-                            onClick={() => removeExtra(item.id, e.name)}
-                            aria-label={`remove ${e.name}`}
-                            style={{ color: 'var(--text-muted)', cursor: 'pointer', lineHeight: 1, padding: 0 }}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
+                  <CartLineConfig
+                    booking={item.booking}
+                    onRemoveOption={() => removeOption(item.id)}
+                    onRemoveExtra={(n) => removeExtra(item.id, n)}
+                    compact
+                  />
                   <div className="cart-item-qty">
                     <button
                       className="cart-qty-btn"

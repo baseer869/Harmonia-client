@@ -5,6 +5,8 @@ export interface CartBooking {
   serviceId: string;
   people?: number;
   optionName?: string;
+  /** Price the chosen variant added (so it can be subtracted if removed). */
+  optionPriceDeltaCents?: number;
   scheduledAt?: string;
   extras: { name: string; priceCents: number }[];
 }

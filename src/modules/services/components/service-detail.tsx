@@ -95,6 +95,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
         serviceId: service.id,
         people: needsPeople ? people : undefined,
         optionName: option || undefined,
+        optionPriceDeltaCents: option ? optionDelta : undefined,
         scheduledAt: date ? new Date(date).toISOString() : undefined,
         extras: selectedExtras.map((e) => ({ name: e.name, priceCents: e.priceCents })),
       },
