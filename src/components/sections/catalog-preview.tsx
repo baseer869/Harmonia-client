@@ -124,7 +124,7 @@ export function CatalogPreview() {
     return (
       <article key={s.id} className="group">
         <LocalizedLink href={`/voyageurs/${s.slug}`} className="block">
-          <div className="relative !h-[190px] w-full overflow-hidden bg-black !max-[768px]:h-[220px]">
+          <div className="relative  !h-[190px] w-full overflow-hidden bg-black !max-[768px]:h-[220px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={resolveAssetUrl(s.coverUrl ?? s.thumbUrl)}
@@ -136,7 +136,7 @@ export function CatalogPreview() {
         </LocalizedLink>
 
         <div className="!pt-[16px]">
-          <h3 className="!text-lg font-normal! leading-none text-[#C4A85B]">
+          <h3 className="!text-lg font-serif font-medium! font-normal! leading-none text-[#C4A85B]">
             {s.title}
           </h3>
 
@@ -149,14 +149,14 @@ export function CatalogPreview() {
           <div className="!mt-[10px] grid grid-cols-2 gap-[8px]">
             <LocalizedLink
               href={`/voyageurs/${s.slug}`}
-              className="flex h-[29px] items-center justify-center border border-[#C4A85B] bg-[#C4A85B] text-[10px] font-semibold text-black transition-colors duration-300 hover:bg-[#d2b96d]"
+              className="flex !h-[29px] items-center justify-center border border-[#C4A85B] bg-[#C4A85B] text-xs! font-semibold !text-black transition-colors duration-300 hover:bg-[#d2b96d]"
             >
               {locale === 'en' ? 'Purchase Now' : 'Acheter'}
             </LocalizedLink>
 
             <LocalizedLink
               href={`/voyageurs/${s.slug}`}
-              className="flex h-[29px] items-center justify-center border border-[#C4A85B] bg-transparent text-[10px] font-semibold text-[#C4A85B] transition-colors duration-300 hover:bg-[#C4A85B] hover:text-black"
+              className="flex !h-[29px] items-center hover:text-white! justify-center border border-[#C4A85B] bg-transparent text-xs! font-semibold !text-[#C4A85B] transition-colors duration-300 hover:bg-[#C4A85B] hover:text-black"
             >
               {locale === 'en' ? 'Add To Cart' : 'Ajouter'}
             </LocalizedLink>
@@ -167,8 +167,8 @@ export function CatalogPreview() {
   };
 
   return (
-    <section className="relative bg-black px-6 !py-[64px] text-white">
-      <div className="mx-auto max-w-[1290px]">
+<section className="relative bg-black !py-[80px] text-white">
+  <div className="mx-auto! w-full max-w-[1728px] !px-[96px] max-[1280px]:!px-[56px] max-[768px]:!px-[24px]">
         <div className="!mb-[48px] text-center">
           <div className="!mb-[8px] flex items-center justify-center gap-4">
             <span className="!h-px !w-[130px] bg-[#C4A85B]/50" />
@@ -213,10 +213,10 @@ export function CatalogPreview() {
           </Reveal>
         )}
 
-        <div className="mt-[52px] text-center">
+        <div className="!mt-[52px] text-center">
           <LocalizedLink
             href="/voyageurs"
-            className="inline-flex h-[42px] items-center justify-center border border-[#C4A85B] px-8 text-[11px] font-semibold tracking-[2px] text-[#C4A85B] uppercase transition-colors duration-300 hover:bg-[#C4A85B] hover:text-black"
+            className="inline-flex !h-[42px] items-center justify-center border border-[#C4A85B] !px-8 !text-[11px] font-semibold tracking-[2px] !text-[#C4A85B] hover:text-white! uppercase transition-colors duration-300 hover:bg-[#C4A85B] hover:text-black"
           >
             {t.viewAll}
           </LocalizedLink>

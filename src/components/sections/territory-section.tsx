@@ -301,7 +301,7 @@ export function TerritorySection() {
           : 'Basés à Marrakech, rayonnant sur tout le Royaume.'}
       </p>
 
-      <div className="mx-auto w-full max-w-[1040px]">
+      <div className="mx-auto! w-full max-w-[1040px]">
         {/* real Morocco map */}
         <div className="relative mx-auto w-full overflow-hidden rounded-[12px] border border-[rgba(201,168,76,0.28)] bg-[#0a0f1a] shadow-[0_18px_45px_rgba(0,0,0,0.45)]">
           <iframe
