@@ -19,7 +19,7 @@ export function PageHero({
       <div className="page-hero-overlay" />
       <div className="page-hero-content">
         <div className="page-hero-eyebrow">{eyebrow}</div>
-        <h1 className="page-hero-title">{title}</h1>
+        <h1 className="page-hero-title font-bold!">{title}</h1>
       </div>
     </div>
   );
