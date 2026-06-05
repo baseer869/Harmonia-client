@@ -274,6 +274,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
                     {service.options.map((o) => (
                       <option key={o.name} value={o.name}>
                         {o.name}
+                        {o.priceDeltaCents ? ` (+${money(o.priceDeltaCents, service.currency)})` : ''}
                       </option>
                     ))}
                   </select>

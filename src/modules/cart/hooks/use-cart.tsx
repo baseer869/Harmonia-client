@@ -39,10 +39,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<Currency>('MAD');
   const [isOpen, setIsOpen] = useState(false);
 
-  // Hydrate from localStorage once on mount.
+  // Hydrate from localStorage once on mount, collapsing any duplicate rows
+  // (same id = same service + date + people + variant + add-ons) into one line.
   useEffect(() => {
     const saved = storage.get<CartItem[]>(STORAGE_KEY);
-    if (saved) setCart(saved);
+    if (!saved) return;
+    const merged: CartItem[] = [];
+    for (const it of saved) {
+      const dup = merged.find((m) => m.id === it.id);
+      if (dup) dup.qty += it.qty;
+      else merged.push({ ...it });
+    }
+    setCart(merged);
   }, []);
 
   useEffect(() => {
