@@ -6,7 +6,7 @@ import { useI18n } from '@/i18n/provider';
 import { LocalizedLink } from '@/components/ui';
 import { money } from '@/lib/format';
 import { useCreateBooking } from '@/modules/reservations';
-import { useCart } from '../hooks';
+import { useCart, lineTotalMad } from '../hooks';
 import type { Currency } from '../types';
 import { CartLineConfig } from './cart-line-config';
 
@@ -216,7 +216,7 @@ export function CartPage() {
                   </div>
                   <div className="panier-item-right">
                     <div className="panier-item-price">
-                      MAD {(item.price * item.qty).toLocaleString('fr-FR')}
+                      MAD {lineTotalMad(item).toLocaleString('fr-FR')}
                     </div>
                     <button className="panier-item-del" onClick={() => removeFromCart(item.id)}>
                       {t.remove}
@@ -249,7 +249,7 @@ export function CartPage() {
                   <span>
                     {item.name} ×{item.qty}
                   </span>
-                  <span>MAD {(item.price * item.qty).toLocaleString('fr-FR')}</span>
+                  <span>MAD {lineTotalMad(item).toLocaleString('fr-FR')}</span>
                 </div>
               ))}
               <div className="panier-sum-row total">

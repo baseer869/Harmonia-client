@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 import { useI18n } from '@/i18n/provider';
 import { LocalizedLink } from '@/components/ui';
-import { useCart } from '../hooks';
+import { useCart, lineTotalMad } from '../hooks';
 import type { Currency } from '../types';
 import { CartLineConfig } from './cart-line-config';
 
@@ -108,11 +108,11 @@ export function CartDrawer() {
                 </div>
                 <div className="cart-item-right">
                   <div className="cart-item-price">
-                    MAD {(item.price * item.qty).toLocaleString('fr-FR')}
+                    MAD {lineTotalMad(item).toLocaleString('fr-FR')}
                   </div>
                   {currency !== 'MAD' && (
                     <div className="cart-item-conv">
-                      ≈ {convertPrice(item.price * item.qty, currency)}
+                      ≈ {convertPrice(lineTotalMad(item), currency)}
                     </div>
                   )}
                   <button

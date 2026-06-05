@@ -34,6 +34,18 @@ interface CartCtx {
   convertPrice: (mad: number, cur: Currency) => string;
 }
 
+/**
+ * Line total (MAD). The service quantity multiplies ONLY the package part;
+ * add-ons are flat — counted solely by their own − / + counter.
+ *   total = packageTotal × qty + Σ(add-on price × add-on count)
+ */
+export function lineTotalMad(item: CartItem): number {
+  const b = item.booking;
+  if (!b) return item.price * item.qty;
+  const addons = b.extras.reduce((s, e) => s + e.priceCents * e.qty, 0);
+  return Math.round((b.packageTotalCents * item.qty + addons) / 100);
+}
+
 const CartContext = createContext<CartCtx | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -129,7 +141,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
-  const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const cartTotal = cart.reduce((s, i) => s + lineTotalMad(i), 0);
 
   return (
     <CartContext.Provider
