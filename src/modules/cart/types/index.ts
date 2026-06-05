@@ -4,11 +4,12 @@
 export interface CartBooking {
   serviceId: string;
   people?: number;
+  /** Chosen package (undefined = the Base package). */
   optionName?: string;
-  /** Price the chosen variant added (so it can be subtracted if removed). */
-  optionPriceDeltaCents?: number;
+  /** Package price × people — the fixed part of the line; add-ons stack on top. */
+  packageTotalCents: number;
   scheduledAt?: string;
-  extras: { name: string; priceCents: number }[];
+  extras: { name: string; priceCents: number; qty: number }[];
 }
 
 export interface CartItem {

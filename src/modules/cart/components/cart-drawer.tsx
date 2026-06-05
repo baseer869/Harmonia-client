@@ -19,8 +19,7 @@ export function CartDrawer() {
     openCart,
     closeCart,
     removeFromCart,
-    removeExtra,
-    removeOption,
+    changeExtraQty,
     changeQty,
     setCurrency,
     cartCount,
@@ -88,8 +87,7 @@ export function CartDrawer() {
                   <div className="cart-item-sub">{item.sub || t.item}</div>
                   <CartLineConfig
                     booking={item.booking}
-                    onRemoveOption={() => removeOption(item.id)}
-                    onRemoveExtra={(n) => removeExtra(item.id, n)}
+                    onChangeExtraQty={(n, d) => changeExtraQty(item.id, n, d)}
                     compact
                   />
                   <div className="cart-item-qty">

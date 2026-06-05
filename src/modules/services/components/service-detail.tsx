@@ -52,8 +52,8 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const [qty, setQty] = useState(1);
   const [date, setDate] = useState('');
   const [persons, setPersons] = useState('2');
-  const [option, setOption] = useState('');
-  const [extras, setExtras] = useState<string[]>([]);
+  const [option, setOption] = useState(''); // '' = the Base package
+  const [extrasQty, setExtrasQty] = useState<Record<string, number>>({});
 
   const needsPeople = service.priceMode === 'PER_PERSON';
   const personOptions = useMemo(() => {
@@ -66,28 +66,33 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const stars = '★'.repeat(Math.max(0, Math.round(service.ratingCached))) || '—';
   const tabs = [t.tabDescription, t.tabIncluded, t.tabInfo, t.tabReviews];
 
-  const toggleExtra = (name: string) =>
-    setExtras((cur) => (cur.includes(name) ? cur.filter((n) => n !== name) : [...cur, name]));
+  const bumpExtra = (name: string, delta: number) =>
+    setExtrasQty((cur) => ({ ...cur, [name]: Math.max(0, (cur[name] ?? 0) + delta) }));
+
+  // Resolved package unit price (Base price, or the chosen package's full price).
+  const pkgCents = option
+    ? (service.options.find((o) => o.name === option)?.priceDeltaCents ?? service.priceCents)
+    : service.priceCents;
 
   const handleAdd = (checkout: boolean) => {
     const people = needsPeople ? Math.max(1, parseInt(persons, 10)) : 1;
-    const selectedExtras = service.extras.filter((e) => extras.includes(e.name));
-    // One cart line per service: re-adding the same service updates this line
-    // (never stacks a duplicate row).
+    // Add-ons the customer set a count for (flat, not × people).
+    const selectedExtras = service.extras
+      .map((e) => ({ name: e.name, priceCents: e.priceCents, qty: extrasQty[e.name] ?? 0 }))
+      .filter((e) => e.qty > 0);
+    // One cart line per service (re-adding updates this line, never a duplicate).
     const lineId = service.id;
-    // Per-unit display estimate (base × people + option delta + add-ons), mirroring
-    // the server formula. The cart multiplies by qty; the authoritative total is
-    // computed server-side at checkout.
-    const optionDelta = service.options.find((o) => o.name === option)?.priceDeltaCents ?? 0;
-    const extrasSum = selectedExtras.reduce((s, e) => s + e.priceCents, 0);
-    const baseCents = needsPeople ? service.priceCents * people : service.priceCents;
-    const estimate = Math.round((baseCents + optionDelta + extrasSum) / 100);
+    // Pricing: package price × people + Σ(add-on × count). Authoritative total
+    // is recomputed server-side at checkout.
+    const packageTotalCents = needsPeople ? pkgCents * people : pkgCents;
+    const addonsCents = selectedExtras.reduce((s, e) => s + e.priceCents * e.qty, 0);
+    const estimate = Math.round((packageTotalCents + addonsCents) / 100);
     const item = {
       id: lineId,
       name: title,
       sub: `${date || t.dateConfirm} · ${persons} ${
         Number(persons) > 1 ? t.persons : t.person
-      }${option ? ` · ${option}` : ''}`,
+      }`,
       price: estimate,
       img: thumb,
       currency: service.currency,
@@ -95,9 +100,9 @@ export function ServiceDetail({ service }: { service: PublicService }) {
         serviceId: service.id,
         people: needsPeople ? people : undefined,
         optionName: option || undefined,
-        optionPriceDeltaCents: option ? optionDelta : undefined,
+        packageTotalCents,
         scheduledAt: date ? new Date(date).toISOString() : undefined,
-        extras: selectedExtras.map((e) => ({ name: e.name, priceCents: e.priceCents })),
+        extras: selectedExtras,
       },
     };
 
@@ -271,13 +276,12 @@ export function ServiceDetail({ service }: { service: PublicService }) {
                 )}
                 {service.options.length > 0 && (
                   <select value={option} onChange={(e) => setOption(e.target.value)}>
-                    <option value="" disabled>
-                      {locale === 'en' ? 'Choose a variant…' : 'Choisir une variante…'}
+                    <option value="">
+                      {(locale === 'en' ? 'Base' : 'Base')} — {money(service.priceCents, service.currency)}
                     </option>
                     {service.options.map((o) => (
                       <option key={o.name} value={o.name}>
-                        {o.name}
-                        {o.priceDeltaCents ? ` (+${money(o.priceDeltaCents, service.currency)})` : ''}
+                        {o.name} — {money(o.priceDeltaCents, service.currency)}
                       </option>
                     ))}
                   </select>
@@ -288,20 +292,22 @@ export function ServiceDetail({ service }: { service: PublicService }) {
                   <div className="booking-divider" />
                   <div className="extras-title">{t.extrasTitle}</div>
                   {service.extras.map((x) => {
-                    const on = extras.includes(x.name);
+                    const q = extrasQty[x.name] ?? 0;
                     return (
                       <div key={x.name} className="extra-item">
                         <span className="extra-name">{x.name}</span>
                         <span className="extra-price">
                           +{money(x.priceCents, service.currency)}
                         </span>
-                        <button
-                          className="extra-add"
-                          onClick={() => toggleExtra(x.name)}
-                          style={on ? { background: 'var(--gold)', color: 'var(--black)' } : undefined}
-                        >
-                          {on ? `✓ ${t.remove}` : t.add}
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <button className="cart-qty-btn" onClick={() => bumpExtra(x.name, -1)}>
+                            −
+                          </button>
+                          <span style={{ minWidth: 18, textAlign: 'center', color: 'var(--cream)' }}>{q}</span>
+                          <button className="cart-qty-btn" onClick={() => bumpExtra(x.name, 1)}>
+                            +
+                          </button>
+                        </div>
                       </div>
                     );
                   })}

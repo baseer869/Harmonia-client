@@ -31,8 +31,7 @@ export function CartPage() {
     currency,
     setCurrency,
     removeFromCart,
-    removeExtra,
-    removeOption,
+    changeExtraQty,
     changeQty,
     clearCart,
     cartTotal,
@@ -203,8 +202,7 @@ export function CartPage() {
                     <div className="panier-item-detail">{item.sub}</div>
                     <CartLineConfig
                       booking={item.booking}
-                      onRemoveOption={() => removeOption(item.id)}
-                      onRemoveExtra={(n) => removeExtra(item.id, n)}
+                      onChangeExtraQty={(n, d) => changeExtraQty(item.id, n, d)}
                     />
                     <div className="panier-item-qty">
                       <button className="panier-qty-btn" onClick={() => changeQty(item.id, -1)}>

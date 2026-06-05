@@ -25,7 +25,7 @@ interface CartCtx {
   addToCart: (item: Omit<CartItem, 'qty'>, quantity?: number, mode?: 'add' | 'set') => void;
   removeFromCart: (id: string) => void;
   removeExtra: (id: string, extraName: string) => void;
-  removeOption: (id: string) => void;
+  changeExtraQty: (id: string, extraName: string, delta: number) => void;
   clearCart: () => void;
   changeQty: (id: string, delta: number) => void;
   setCurrency: (c: Currency) => void;
@@ -77,33 +77,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  // Remove a single add-on from a cart line and subtract its price from the line.
+  // Line price (display units) = package total + Σ(add-on price × count).
+  const priceFor = (b: NonNullable<CartItem['booking']>) =>
+    Math.round((b.packageTotalCents + b.extras.reduce((s, e) => s + e.priceCents * e.qty, 0)) / 100);
+
   const removeExtra = useCallback((id: string, extraName: string) => {
     setCart((prev) =>
       prev.map((c) => {
         if (c.id !== id || !c.booking) return c;
-        const ex = c.booking.extras.find((e) => e.name === extraName);
-        if (!ex) return c;
-        return {
-          ...c,
-          price: Math.max(0, c.price - Math.round(ex.priceCents / 100)),
-          booking: { ...c.booking, extras: c.booking.extras.filter((e) => e.name !== extraName) },
-        };
+        const booking = { ...c.booking, extras: c.booking.extras.filter((e) => e.name !== extraName) };
+        return { ...c, booking, price: priceFor(booking) };
       }),
     );
   }, []);
 
-  // Remove the chosen variant from a cart line and subtract its price.
-  const removeOption = useCallback((id: string) => {
+  // Add-on − / + counter inside the cart; dropping below 1 removes the add-on.
+  const changeExtraQty = useCallback((id: string, extraName: string, delta: number) => {
     setCart((prev) =>
       prev.map((c) => {
-        if (c.id !== id || !c.booking?.optionName) return c;
-        const delta = Math.round((c.booking.optionPriceDeltaCents ?? 0) / 100);
-        return {
-          ...c,
-          price: Math.max(0, c.price - delta),
-          booking: { ...c.booking, optionName: undefined, optionPriceDeltaCents: undefined },
-        };
+        if (c.id !== id || !c.booking) return c;
+        const extras = c.booking.extras
+          .map((e) => (e.name === extraName ? { ...e, qty: e.qty + delta } : e))
+          .filter((e) => e.qty > 0);
+        const booking = { ...c.booking, extras };
+        return { ...c, booking, price: priceFor(booking) };
       }),
     );
   }, []);
@@ -145,7 +142,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         addToCart,
         removeFromCart,
         removeExtra,
-        removeOption,
+        changeExtraQty,
         clearCart,
         changeQty,
         setCurrency,
