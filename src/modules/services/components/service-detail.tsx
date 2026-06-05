@@ -23,23 +23,12 @@ const TYPE_LABEL: Record<PublicService['type'], string> = {
   PRODUCT: 'Produit',
   QUOTE: 'Sur devis',
 };
-const MODE_SUFFIX: Record<PublicService['priceMode'], string> = {
-  PER_PERSON: '/ pers.',
-  PER_TRIP: '/ trajet',
-  FIXED: '',
-  ON_QUOTE: '',
-};
-
 export function ServiceDetail({ service }: { service: PublicService }) {
   const { dict, locale } = useI18n();
   const t = dict.pages.service;
 
   const title = service.title;
   const catLabel = service.tags[0] ?? TYPE_LABEL[service.type];
-  const priceLabel =
-    service.priceMode === 'ON_QUOTE'
-      ? 'Sur devis'
-      : `${money(service.priceCents, service.currency)} ${MODE_SUFFIX[service.priceMode]}`.trim();
 
   // One photo serves both: fall back to whichever is present.
   const photo = service.coverUrl ?? service.thumbUrl;
@@ -73,6 +62,22 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const pkgCents = option
     ? (service.options.find((o) => o.name === option)?.priceDeltaCents ?? service.priceCents)
     : service.priceCents;
+
+  // Live price shown at the top — reflects the current package + people + add-ons.
+  // On refresh the state resets (Base package, default people, no add-ons) so it
+  // shows the base price by default.
+  const livePeople = needsPeople ? Math.max(1, parseInt(persons, 10) || 1) : 1;
+  const liveAddonsCents = service.extras.reduce(
+    (s, e) => s + e.priceCents * (extrasQty[e.name] ?? 0),
+    0,
+  );
+  const liveTotalCents = (needsPeople ? pkgCents * livePeople : pkgCents) + liveAddonsCents;
+  const priceLabel =
+    service.priceMode === 'ON_QUOTE'
+      ? locale === 'en'
+        ? 'On request'
+        : 'Sur devis'
+      : money(liveTotalCents, service.currency);
 
   const handleAdd = (checkout: boolean) => {
     const people = needsPeople ? Math.max(1, parseInt(persons, 10)) : 1;
