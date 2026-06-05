@@ -198,6 +198,7 @@ export const en: Dictionary = {
       optionsTitle: "Available options",
       extrasTitle: "Optional extras",
       add: "+ Add",
+      remove: "Remove",
       bookNow: "Book now",
       addToCart: "+ Add to cart",
       deposit: "30% deposit",

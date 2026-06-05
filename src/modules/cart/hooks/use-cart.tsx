@@ -60,12 +60,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addToCart = useCallback(
     (item: Omit<CartItem, 'qty'>, quantity = 1, mode: 'add' | 'set' = 'add') => {
       setCart((prev) => {
-        // Same service + date + people + option + extras → one row.
-        // 'add' bumps the qty; 'set' replaces it (used by "Book now").
+        // One row per service (item.id = serviceId). Re-adding the same service
+        // refreshes its row to the latest selection; 'add' bumps the qty,
+        // 'set' replaces it (used by "Book now").
         const existing = prev.find((c) => c.id === item.id);
         if (existing) {
           const qty = mode === 'set' ? quantity : existing.qty + quantity;
-          return prev.map((c) => (c.id === item.id ? { ...c, qty } : c));
+          return prev.map((c) => (c.id === item.id ? { ...item, qty } : c));
         }
         return [...prev, { ...item, qty: quantity }];
       });

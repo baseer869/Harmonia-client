@@ -52,7 +52,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const [qty, setQty] = useState(1);
   const [date, setDate] = useState('');
   const [persons, setPersons] = useState('2');
-  const [option, setOption] = useState(service.options[0]?.name ?? '');
+  const [option, setOption] = useState('');
   const [extras, setExtras] = useState<string[]>([]);
 
   const needsPeople = service.priceMode === 'PER_PERSON';
@@ -72,15 +72,9 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const handleAdd = (checkout: boolean) => {
     const people = needsPeople ? Math.max(1, parseInt(persons, 10)) : 1;
     const selectedExtras = service.extras.filter((e) => extras.includes(e.name));
-    // Stable id: identical service + date + people + option + extras collapses
-    // into one cart line (qty increments) instead of stacking duplicate rows.
-    const lineId = [
-      service.id,
-      date,
-      needsPeople ? people : '',
-      option,
-      selectedExtras.map((e) => e.name).sort().join('+'),
-    ].join('|');
+    // One cart line per service: re-adding the same service updates this line
+    // (never stacks a duplicate row).
+    const lineId = service.id;
     // Per-unit display estimate (base × people + option delta + add-ons), mirroring
     // the server formula. The cart multiplies by qty; the authoritative total is
     // computed server-side at checkout.
@@ -276,6 +270,9 @@ export function ServiceDetail({ service }: { service: PublicService }) {
                 )}
                 {service.options.length > 0 && (
                   <select value={option} onChange={(e) => setOption(e.target.value)}>
+                    <option value="" disabled>
+                      {locale === 'en' ? 'Choose a variant…' : 'Choisir une variante…'}
+                    </option>
                     {service.options.map((o) => (
                       <option key={o.name} value={o.name}>
                         {o.name}
@@ -302,7 +299,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
                           onClick={() => toggleExtra(x.name)}
                           style={on ? { background: 'var(--gold)', color: 'var(--black)' } : undefined}
                         >
-                          {on ? '✓' : t.add}
+                          {on ? `✓ ${t.remove}` : t.add}
                         </button>
                       </div>
                     );

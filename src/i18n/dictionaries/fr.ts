@@ -206,6 +206,7 @@ export const fr = {
       optionsTitle: "Options disponibles",
       extrasTitle: "Extras optionnels",
       add: "+ Ajouter",
+      remove: "Retirer",
       bookNow: "Réserver maintenant",
       addToCart: "+ Ajouter au panier",
       deposit: "Acompte 30%",
