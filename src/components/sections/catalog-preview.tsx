@@ -103,14 +103,19 @@ import { LocalizedLink, Reveal } from '@/components/ui';
 import { onImageError, resolveAssetUrl } from '@/lib/format';
 import { usePublicServices, type PublicService } from '@/modules/services';
 
+// function serviceShortText(s: PublicService): string {
+//   if (s.shortDescription) return s.shortDescription;
+//   if (s.description) return s.description;
+//   if (s.tags?.length) return s.tags.slice(0, 2).join(' · ');
+//   if (s.included?.length) return s.included.slice(0, 2).map((i) => i.title).join(' · ');
+//   return '';
+// }
 function serviceShortText(s: PublicService): string {
-  if (s.shortDescription) return s.shortDescription;
   if (s.description) return s.description;
   if (s.tags?.length) return s.tags.slice(0, 2).join(' · ');
   if (s.included?.length) return s.included.slice(0, 2).map((i) => i.title).join(' · ');
   return '';
 }
-
 export function CatalogPreview() {
   const { dict, locale } = useI18n();
   const t = dict.home.catalog;
