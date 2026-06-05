@@ -3,6 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { PageHero } from '@/components/layouts';
 import { TerritorySection } from '@/components/sections';
 import { Reveal } from '@/components/ui';
+import { OwnerRequestForm } from '@/modules/owner-requests';
 import { defaultLocale, isLocale } from '@/i18n';
 import { contact } from '@/content/contact';
 
@@ -56,49 +57,8 @@ export default async function ContactPage({
             </div>
           </Reveal>
           <Reveal delay="0.18s">
-            {/* Static preview — wired to /api/public/contact in a later stage. */}
-            <div className="contact-form">
-              <div className="f-row">
-                <div className="f-field">
-                  <input type="text" placeholder={c.form.firstName} />
-                </div>
-                <div className="f-field">
-                  <input type="text" placeholder={c.form.lastName} />
-                </div>
-              </div>
-              <div className="f-field">
-                <input type="email" placeholder={c.form.email} />
-              </div>
-              <div className="f-field">
-                <input type="tel" placeholder={c.form.phone} />
-              </div>
-              <div className="f-field">
-                <select defaultValue="">
-                  <option value="" disabled>
-                    {c.form.rolePlaceholder}
-                  </option>
-                  {c.form.roles.map((r) => (
-                    <option key={r}>{r}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="f-field">
-                <select defaultValue="">
-                  <option value="" disabled>
-                    {c.form.subjectPlaceholder}
-                  </option>
-                  {c.form.subjects.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="f-field">
-                <textarea placeholder={c.form.message} style={{ height: 140 }} />
-              </div>
-              <button className="f-submit" type="button">
-                {c.form.submit}
-              </button>
-            </div>
+            {/* Live provider-lead form → admin Owner Requests. */}
+            <OwnerRequestForm />
           </Reveal>
         </div>
       </section>

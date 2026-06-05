@@ -159,9 +159,11 @@ export function ServicesCatalog() {
   }
 
   return (
-    <div className="mx-auto grid max-w-[1400px] grid-cols-4 gap-x-[22px] gap-y-[28px] max-[1100px]:grid-cols-3 max-[768px]:grid-cols-2 max-[520px]:grid-cols-1">
+    <div className="mx-auto flex max-w-[1400px] flex-wrap justify-center gap-x-[22px] gap-y-[28px]">
       {services.map((s) => (
-        <ServiceCard key={s.id} service={s} />
+        <div key={s.id} className="w-[300px] max-w-full">
+          <ServiceCard service={s} />
+        </div>
       ))}
     </div>
   );
