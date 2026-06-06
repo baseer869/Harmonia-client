@@ -302,7 +302,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
                 💳 <strong>{t.deposit}</strong> {t.depositNote}
               </div>
               <div style={{ display: 'flex', gap: 10, marginTop: 4, alignItems: 'center' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)', flex: 1 }}>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', flex: 1, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   {needsPeople
                     ? locale === 'en'
                       ? 'People'
@@ -310,14 +310,41 @@ export function ServiceDetail({ service }: { service: PublicService }) {
                     : locale === 'en'
                       ? 'Quantity'
                       : 'Quantité'}
+                  {needsPeople && service.maxPeople ? (
+                    <span
+                      title={
+                        locale === 'en'
+                          ? `Up to ${service.maxPeople} people for this experience`
+                          : `Jusqu'à ${service.maxPeople} personnes pour cette expérience`
+                      }
+                      style={{
+                        fontSize: 10,
+                        color: 'var(--gold)',
+                        border: '1px solid rgba(201,168,76,.4)',
+                        borderRadius: 999,
+                        padding: '1px 7px',
+                        cursor: 'help',
+                      }}
+                    >
+                      {locale === 'en' ? `max ${service.maxPeople}` : `max ${service.maxPeople}`} ⓘ
+                    </span>
+                  ) : null}
                 </span>
-                <button className="cart-qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}>
+                <button
+                  className="cart-qty-btn"
+                  onClick={() => setQty(Math.max(1, qty - 1))}
+                >
                   −
                 </button>
                 <span style={{ fontSize: 14, color: 'var(--cream)', minWidth: 24, textAlign: 'center' }}>
                   {qty}
                 </span>
-                <button className="cart-qty-btn" onClick={() => setQty(Math.min(maxCount, qty + 1))}>
+                <button
+                  className="cart-qty-btn"
+                  disabled={qty >= maxCount}
+                  style={qty >= maxCount ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+                  onClick={() => setQty(Math.min(maxCount, qty + 1))}
+                >
                   +
                 </button>
               </div>
