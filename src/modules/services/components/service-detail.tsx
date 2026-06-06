@@ -45,7 +45,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const [extrasQty, setExtrasQty] = useState<Record<string, number>>({});
 
   const needsPeople = service.priceMode === 'PER_PERSON';
-  const maxCount = service.maxPeople ?? 99;
+  const maxCount = needsPeople ? (service.maxPeople ?? 99) : 99;
 
   const hasReviews = service.reviewCount > 0;
   const stars = '★'.repeat(Math.max(0, Math.round(service.ratingCached))) || '—';
@@ -72,10 +72,6 @@ export function ServiceDetail({ service }: { service: PublicService }) {
         : 'Sur devis'
       : money(liveTotalCents, service.currency);
 
-  const countLabel = needsPeople
-    ? `${qty} ${qty > 1 ? t.persons : t.person}`
-    : `× ${qty}`;
-
   const handleAdd = (checkout: boolean) => {
     // Add-ons the customer set a count for (flat, not × the package count).
     const selectedExtras = service.extras
@@ -87,7 +83,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
     const item = {
       id: lineId,
       name: title,
-      sub: `${date || t.dateConfirm} · ${countLabel}`,
+      sub: date || t.dateConfirm,
       price: estimate,
       img: thumb,
       currency: service.currency,
