@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { useI18n } from '@/i18n/provider';
 import { useRouter } from '@/i18n/navigation';
@@ -38,18 +38,14 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const { addToCart, clearCart } = useCart();
   const router = useRouter();
   const [tab, setTab] = useState(0);
+  // One counter per service: number of people (per-person) or units (others).
   const [qty, setQty] = useState(1);
   const [date, setDate] = useState('');
-  const [persons, setPersons] = useState('2');
   const [option, setOption] = useState(''); // '' = the Base package
   const [extrasQty, setExtrasQty] = useState<Record<string, number>>({});
 
   const needsPeople = service.priceMode === 'PER_PERSON';
-  const personOptions = useMemo(() => {
-    const max = service.maxPeople ?? 10;
-    const base = [1, 2, 3, 4, 5, 6, 8, 10].filter((n) => n <= max);
-    return base.length ? base : [1];
-  }, [service.maxPeople]);
+  const maxCount = service.maxPeople ?? 99;
 
   const hasReviews = service.reviewCount > 0;
   const stars = '★'.repeat(Math.max(0, Math.round(service.ratingCached))) || '—';
@@ -63,15 +59,12 @@ export function ServiceDetail({ service }: { service: PublicService }) {
     ? (service.options.find((o) => o.name === option)?.priceDeltaCents ?? service.priceCents)
     : service.priceCents;
 
-  // Live price shown at the top — reflects the current package + people + add-ons.
-  // On refresh the state resets (Base package, default people, no add-ons) so it
-  // shows the base price by default.
-  const livePeople = needsPeople ? Math.max(1, parseInt(persons, 10) || 1) : 1;
+  // Live price at the top — package × count + add-ons. Resets to base on refresh.
   const liveAddonsCents = service.extras.reduce(
     (s, e) => s + e.priceCents * (extrasQty[e.name] ?? 0),
     0,
   );
-  const liveTotalCents = (needsPeople ? pkgCents * livePeople : pkgCents) + liveAddonsCents;
+  const liveTotalCents = pkgCents * qty + liveAddonsCents;
   const priceLabel =
     service.priceMode === 'ON_QUOTE'
       ? locale === 'en'
@@ -79,33 +72,32 @@ export function ServiceDetail({ service }: { service: PublicService }) {
         : 'Sur devis'
       : money(liveTotalCents, service.currency);
 
+  const countLabel = needsPeople
+    ? `${qty} ${qty > 1 ? t.persons : t.person}`
+    : `× ${qty}`;
+
   const handleAdd = (checkout: boolean) => {
-    const people = needsPeople ? Math.max(1, parseInt(persons, 10)) : 1;
-    // Add-ons the customer set a count for (flat, not × people).
+    // Add-ons the customer set a count for (flat, not × the package count).
     const selectedExtras = service.extras
       .map((e) => ({ name: e.name, priceCents: e.priceCents, qty: extrasQty[e.name] ?? 0 }))
       .filter((e) => e.qty > 0);
     // One cart line per service (re-adding updates this line, never a duplicate).
     const lineId = service.id;
-    // Pricing: package price × people + Σ(add-on × count). Authoritative total
-    // is recomputed server-side at checkout.
-    const packageTotalCents = needsPeople ? pkgCents * people : pkgCents;
-    const addonsCents = selectedExtras.reduce((s, e) => s + e.priceCents * e.qty, 0);
-    const estimate = Math.round((packageTotalCents + addonsCents) / 100);
+    const estimate = Math.round((pkgCents * qty + selectedExtras.reduce((s, e) => s + e.priceCents * e.qty, 0)) / 100);
     const item = {
       id: lineId,
       name: title,
-      sub: `${date || t.dateConfirm} · ${persons} ${
-        Number(persons) > 1 ? t.persons : t.person
-      }`,
+      sub: `${date || t.dateConfirm} · ${countLabel}`,
       price: estimate,
       img: thumb,
       currency: service.currency,
       booking: {
         serviceId: service.id,
-        people: needsPeople ? people : undefined,
+        // The single count drives the booking quantity; people = count for
+        // per-person services (metadata for the concierge).
+        people: needsPeople ? qty : undefined,
         optionName: option || undefined,
-        packageTotalCents,
+        packageUnitCents: pkgCents,
         scheduledAt: date ? new Date(date).toISOString() : undefined,
         extras: selectedExtras,
       },
@@ -270,15 +262,6 @@ export function ServiceDetail({ service }: { service: PublicService }) {
                     onChange={(e) => setDate(e.target.value)}
                   />
                 )}
-                {needsPeople && (
-                  <select value={persons} onChange={(e) => setPersons(e.target.value)}>
-                    {personOptions.map((n) => (
-                      <option key={n} value={n}>
-                        {n} {n > 1 ? t.persons : t.person}
-                      </option>
-                    ))}
-                  </select>
-                )}
                 {service.options.length > 0 && (
                   <select value={option} onChange={(e) => setOption(e.target.value)}>
                     <option value="">
@@ -322,14 +305,23 @@ export function ServiceDetail({ service }: { service: PublicService }) {
               <div className="acompte-note">
                 💳 <strong>{t.deposit}</strong> {t.depositNote}
               </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 4, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 10, marginTop: 4, alignItems: 'center' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', flex: 1 }}>
+                  {needsPeople
+                    ? locale === 'en'
+                      ? 'People'
+                      : 'Personnes'
+                    : locale === 'en'
+                      ? 'Quantity'
+                      : 'Quantité'}
+                </span>
                 <button className="cart-qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}>
                   −
                 </button>
                 <span style={{ fontSize: 14, color: 'var(--cream)', minWidth: 24, textAlign: 'center' }}>
                   {qty}
                 </span>
-                <button className="cart-qty-btn" onClick={() => setQty(qty + 1)}>
+                <button className="cart-qty-btn" onClick={() => setQty(Math.min(maxCount, qty + 1))}>
                   +
                 </button>
               </div>

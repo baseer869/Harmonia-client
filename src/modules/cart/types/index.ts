@@ -6,8 +6,8 @@ export interface CartBooking {
   people?: number;
   /** Chosen package (undefined = the Base package). */
   optionName?: string;
-  /** Package price × people — the fixed part of the line; add-ons stack on top. */
-  packageTotalCents: number;
+  /** Per-unit package price; the line = packageUnit × count (cart qty) + add-ons. */
+  packageUnitCents: number;
   scheduledAt?: string;
   extras: { name: string; priceCents: number; qty: number }[];
 }

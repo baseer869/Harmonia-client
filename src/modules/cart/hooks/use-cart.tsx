@@ -43,7 +43,7 @@ export function lineTotalMad(item: CartItem): number {
   const b = item.booking;
   if (!b) return item.price * item.qty;
   const addons = b.extras.reduce((s, e) => s + e.priceCents * e.qty, 0);
-  return Math.round((b.packageTotalCents * item.qty + addons) / 100);
+  return Math.round((b.packageUnitCents * item.qty + addons) / 100);
 }
 
 const CartContext = createContext<CartCtx | null>(null);
@@ -91,7 +91,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Line price (display units) = package total + Σ(add-on price × count).
   const priceFor = (b: NonNullable<CartItem['booking']>) =>
-    Math.round((b.packageTotalCents + b.extras.reduce((s, e) => s + e.priceCents * e.qty, 0)) / 100);
+    Math.round((b.packageUnitCents + b.extras.reduce((s, e) => s + e.priceCents * e.qty, 0)) / 100);
 
   const removeExtra = useCallback((id: string, extraName: string) => {
     setCart((prev) =>
