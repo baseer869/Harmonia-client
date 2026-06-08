@@ -35,7 +35,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const img = resolveAssetUrl(photo);
   const thumb = resolveAssetUrl(service.thumbUrl ?? service.coverUrl);
 
-  const { cart, addToCart, clearCart } = useCart();
+  const { addToCart, clearCart } = useCart();
   const router = useRouter();
   const [tab, setTab] = useState(0);
   // One counter per service: number of people (per-person) or units (others).
@@ -107,24 +107,8 @@ export function ServiceDetail({ service }: { service: PublicService }) {
       router.push('/panier');
       return;
     }
-
-    // The cart holds ONE provider + ONE currency at a time, so the booking and
-    // totals stay valid. Adding a conflicting item starts a fresh cart.
-    const conflict = cart.some(
-      (c) =>
-        c.booking &&
-        (c.booking.tenantId !== service.tenantId || c.currency !== service.currency),
-    );
-    if (conflict) {
-      const ok = window.confirm(
-        locale === 'en'
-          ? 'Your cart has items from another provider or currency. Start a new cart with this item?'
-          : "Votre panier contient des articles d'un autre prestataire ou d'une autre devise. Démarrer un nouveau panier ?",
-      );
-      if (!ok) return;
-      clearCart();
-    }
-    // Same config merges into one line and bumps the quantity.
+    // Multi-vendor cart: services from any provider can be added together;
+    // checkout splits them into one booking per provider.
     addToCart(item, qty, 'add');
   };
 

@@ -11,7 +11,7 @@ import type { CreateBookingInput } from '../validation';
  * booking; all pricing/validation authority stays in the admin API.
  */
 export function useCreateBooking() {
-  return useMutation<Booking, Error, CreateBookingInput>({
+  return useMutation<Booking[], Error, CreateBookingInput>({
     mutationFn: (input) => bookingApi.create(input),
   });
 }

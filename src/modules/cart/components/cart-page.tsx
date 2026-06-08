@@ -37,16 +37,22 @@ export function CartPage() {
     cartTotal,
     convertPrice,
   } = useCart();
-  const acompte = Math.round(cartTotal * 0.3);
-  // The cart holds one provider → one currency.
-  const cartCurrency = (cart[0]?.currency ?? 'MAD') as Currency;
+  // Multi-vendor cart: totals are grouped by currency (providers may differ).
+  const totalsByCurrency = cart.reduce<Record<string, number>>((acc, i) => {
+    const c = i.currency ?? 'MAD';
+    acc[c] = (acc[c] ?? 0) + lineTotalMad(i);
+    return acc;
+  }, {});
+  const currencyList = Object.keys(totalsByCurrency);
+  const singleCurrency = currencyList.length === 1;
+  const baseCur = (currencyList[0] ?? 'MAD') as Currency;
 
   const createBooking = useCreateBooking();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
-  const booking = createBooking.data;
+  const bookings = createBooking.data;
 
   const checkout = () => {
     setFormError(null);
@@ -90,7 +96,7 @@ export function CartPage() {
           {t.titleA} <span className="g">{t.titleB}</span>
         </h1>
 
-        {booking ? (
+        {bookings && bookings.length ? (
           <div className="panier-empty">
             <div
               className="panier-empty-icon"
@@ -107,72 +113,48 @@ export function CartPage() {
             </div>
             <p
               className="panier-empty-sub"
-              style={{ maxWidth: 500, margin: '0 auto', textAlign: 'center' }}
+              style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center' }}
             >
               {en
-                ? 'Thank you. Your reservation request has been sent — our concierge will contact you shortly to confirm availability and arrange payment.'
-                : 'Merci. Votre demande de réservation a été envoyée — notre conciergerie vous contactera prochainement pour confirmer la disponibilité et organiser le paiement.'}
+                ? `Thank you. Your request has been sent${bookings.length > 1 ? ` to ${bookings.length} providers` : ''} — our concierge will contact you shortly to confirm availability and arrange payment.`
+                : `Merci. Votre demande a été envoyée${bookings.length > 1 ? ` à ${bookings.length} prestataires` : ''} — notre conciergerie vous contactera prochainement pour confirmer la disponibilité et organiser le paiement.`}
             </p>
 
-            <div
-              style={{
-                width: '100%',
-                maxWidth: 420,
-                margin: '8px auto 28px',
-                border: '1px solid rgba(201,168,76,.18)',
-                borderRadius: 12,
-                background: 'rgba(255,255,255,.02)',
-                overflow: 'hidden',
-              }}
-            >
-              {[
-                [en ? 'Reference' : 'Référence', booking.code],
-                [en ? 'Estimated total' : 'Total estimé', money(booking.totalCents, booking.currency)],
-              ].map(([k, v], i) => (
+            <div style={{ width: '100%', maxWidth: 440, margin: '8px auto 28px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {bookings.map((b) => (
                 <div
-                  key={k}
+                  key={b.code}
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    gap: 16,
-                    padding: '14px 20px',
-                    borderTop: i === 0 ? 'none' : '1px solid rgba(201,168,76,.1)',
+                    border: '1px solid rgba(201,168,76,.18)',
+                    borderRadius: 12,
+                    background: 'rgba(255,255,255,.02)',
+                    overflow: 'hidden',
                   }}
                 >
-                  <span style={{ fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                    {k}
-                  </span>
-                  <strong style={{ color: 'var(--gold)', fontFamily: "'Cinzel', serif" }}>{v}</strong>
+                  {[
+                    [en ? 'Reference' : 'Référence', b.code],
+                    [en ? 'Estimated total' : 'Total estimé', money(b.totalCents, b.currency)],
+                    [en ? 'Status' : 'Statut', en ? 'Pending confirmation' : 'En attente'],
+                  ].map(([k, val], i) => (
+                    <div
+                      key={k}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: 16,
+                        padding: '11px 18px',
+                        borderTop: i === 0 ? 'none' : '1px solid rgba(201,168,76,.1)',
+                      }}
+                    >
+                      <span style={{ fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                        {k}
+                      </span>
+                      <strong style={{ color: 'var(--gold)', fontFamily: "'Cinzel', serif" }}>{val}</strong>
+                    </div>
+                  ))}
                 </div>
               ))}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 16,
-                  padding: '14px 20px',
-                  borderTop: '1px solid rgba(201,168,76,.1)',
-                }}
-              >
-                <span style={{ fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                  {en ? 'Status' : 'Statut'}
-                </span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    letterSpacing: 1,
-                    textTransform: 'uppercase',
-                    color: '#d9b44a',
-                    border: '1px solid rgba(217,180,74,.4)',
-                    borderRadius: 999,
-                    padding: '3px 10px',
-                  }}
-                >
-                  {en ? 'Pending confirmation' : 'En attente de confirmation'}
-                </span>
-              </div>
             </div>
 
             <LocalizedLink href="/voyageurs" className="btn-gold">
@@ -204,7 +186,7 @@ export function CartPage() {
                     <div className="panier-item-detail">{item.sub}</div>
                     <CartLineConfig
                       booking={item.booking}
-                      currency={cartCurrency}
+                      currency={item.currency ?? 'MAD'}
                       onChangeExtraQty={(n, d) => changeExtraQty(item.id, n, d)}
                     />
                     <div className="panier-item-qty">
@@ -219,7 +201,7 @@ export function CartPage() {
                   </div>
                   <div className="panier-item-right">
                     <div className="panier-item-price">
-                      {cartCurrency} {lineTotalMad(item).toLocaleString('fr-FR')}
+                      {item.currency ?? 'MAD'} {lineTotalMad(item).toLocaleString('fr-FR')}
                     </div>
                     <button className="panier-item-del" onClick={() => removeFromCart(item.id)}>
                       {t.remove}
@@ -252,21 +234,28 @@ export function CartPage() {
                   <span>
                     {item.name} ×{item.qty}
                   </span>
-                  <span>{cartCurrency} {lineTotalMad(item).toLocaleString('fr-FR')}</span>
+                  <span>{item.currency ?? 'MAD'} {lineTotalMad(item).toLocaleString('fr-FR')}</span>
                 </div>
               ))}
-              <div className="panier-sum-row total">
-                <span>{t.total}</span>
-                <span>{cartCurrency} {cartTotal.toLocaleString('fr-FR')}</span>
-              </div>
-              {currency !== cartCurrency && (
+              {currencyList.map((cur) => (
+                <div key={cur} className="panier-sum-row total">
+                  <span>
+                    {t.total}
+                    {!singleCurrency ? ` (${cur})` : ''}
+                  </span>
+                  <span>{cur} {totalsByCurrency[cur]!.toLocaleString('fr-FR')}</span>
+                </div>
+              ))}
+              {singleCurrency && currency !== baseCur && (
                 <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                  ≈ {convertPrice(cartTotal, currency, cartCurrency)}
+                  ≈ {convertPrice(totalsByCurrency[baseCur]!, currency, baseCur)}
                 </div>
               )}
               <div className="panier-acompte-box">
                 <div className="panier-acompte-val">
-                  {cartCurrency} {acompte.toLocaleString('fr-FR')}
+                  {currencyList
+                    .map((cur) => `${cur} ${Math.round(totalsByCurrency[cur]! * 0.3).toLocaleString('fr-FR')}`)
+                    .join(' · ')}
                 </div>
                 <div className="panier-acompte-lbl">{t.depositLbl}</div>
                 <p className="panier-acompte-note">{t.depositNote}</p>

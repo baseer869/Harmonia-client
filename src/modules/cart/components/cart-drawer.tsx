@@ -34,9 +34,15 @@ export function CartDrawer() {
     };
   }, [isOpen]);
 
-  const acompte = Math.round(cartTotal * 0.3);
-  // The cart holds one provider → one currency.
-  const cartCurrency = (cart[0]?.currency ?? 'MAD') as Currency;
+  // Multi-vendor cart: totals grouped by currency (providers may differ).
+  const totalsByCurrency = cart.reduce<Record<string, number>>((acc, i) => {
+    const c = i.currency ?? 'MAD';
+    acc[c] = (acc[c] ?? 0) + lineTotalMad(i);
+    return acc;
+  }, {});
+  const currencyList = Object.keys(totalsByCurrency);
+  const singleCurrency = currencyList.length === 1;
+  const baseCur = (currencyList[0] ?? 'MAD') as Currency;
 
   return (
     <>
@@ -89,7 +95,7 @@ export function CartDrawer() {
                   <div className="cart-item-sub">{item.sub || t.item}</div>
                   <CartLineConfig
                     booking={item.booking}
-                    currency={cartCurrency}
+                    currency={item.currency ?? 'MAD'}
                     onChangeExtraQty={(n, d) => changeExtraQty(item.id, n, d)}
                     compact
                   />
@@ -111,11 +117,11 @@ export function CartDrawer() {
                 </div>
                 <div className="cart-item-right">
                   <div className="cart-item-price">
-                    {cartCurrency} {lineTotalMad(item).toLocaleString('fr-FR')}
+                    {item.currency ?? 'MAD'} {lineTotalMad(item).toLocaleString('fr-FR')}
                   </div>
-                  {currency !== cartCurrency && (
+                  {currency !== (item.currency ?? 'MAD') && (
                     <div className="cart-item-conv">
-                      ≈ {convertPrice(lineTotalMad(item), currency, cartCurrency)}
+                      ≈ {convertPrice(lineTotalMad(item), currency, (item.currency ?? 'MAD') as Currency)}
                     </div>
                   )}
                   <button
@@ -136,11 +142,13 @@ export function CartDrawer() {
               <div>
                 <div className="cart-total-lbl">{t.total}</div>
                 <div className="cart-total-price">
-                  {cartCurrency} {cartTotal.toLocaleString('fr-FR')}
+                  {currencyList
+                    .map((cur) => `${cur} ${totalsByCurrency[cur]!.toLocaleString('fr-FR')}`)
+                    .join(' · ')}
                 </div>
-                {currency !== cartCurrency && (
+                {singleCurrency && currency !== baseCur && (
                   <div className="cart-total-conv">
-                    ≈ {convertPrice(cartTotal, currency, cartCurrency)}
+                    ≈ {convertPrice(totalsByCurrency[baseCur]!, currency, baseCur)}
                   </div>
                 )}
               </div>
@@ -148,7 +156,10 @@ export function CartDrawer() {
             <div className="cart-acompte-note">
               💳{' '}
               <strong>
-                {t.depositLine} : {cartCurrency} {acompte.toLocaleString('fr-FR')}
+                {t.depositLine} :{' '}
+                {currencyList
+                  .map((cur) => `${cur} ${Math.round(totalsByCurrency[cur]! * 0.3).toLocaleString('fr-FR')}`)
+                  .join(' · ')}
               </strong>
               <br />
               {t.depositNote}

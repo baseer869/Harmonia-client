@@ -11,10 +11,13 @@ import { createBookingSchema, type CreateBookingInput } from '../validation';
  * the admin returns the priced, PENDING booking.
  */
 export const bookingApi = {
-  /** Submit a booking request. Tenant + customer session are attached by `api`. */
-  create(input: CreateBookingInput): Promise<Booking> {
+  /**
+   * Submit a booking request. A multi-vendor cart returns one booking per
+   * provider, so this resolves to an array of bookings.
+   */
+  create(input: CreateBookingInput): Promise<Booking[]> {
     // Parse only to guarantee the request shape before it leaves the browser.
     const payload = createBookingSchema.parse(input);
-    return api.post<Booking>('/bookings', payload);
+    return api.post<Booking[]>('/bookings', payload);
   },
 };
