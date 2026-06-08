@@ -140,7 +140,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return `${SYMBOLS[cur]} ${cur === 'MAD' ? val.toLocaleString('fr-FR') : val.toFixed(0)}`;
   }, []);
 
-  const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+  // Floating-button badge = number of packages (cart lines), NOT the people /
+  // units counter inside a package, and not add-ons.
+  const cartCount = cart.length;
   const cartTotal = cart.reduce((s, i) => s + lineTotalMad(i), 0);
 
   return (
