@@ -35,6 +35,8 @@ export function CartDrawer() {
   }, [isOpen]);
 
   const acompte = Math.round(cartTotal * 0.3);
+  // The cart holds one provider → one currency.
+  const cartCurrency = (cart[0]?.currency ?? 'MAD') as Currency;
 
   return (
     <>
@@ -87,6 +89,7 @@ export function CartDrawer() {
                   <div className="cart-item-sub">{item.sub || t.item}</div>
                   <CartLineConfig
                     booking={item.booking}
+                    currency={cartCurrency}
                     onChangeExtraQty={(n, d) => changeExtraQty(item.id, n, d)}
                     compact
                   />
@@ -108,11 +111,11 @@ export function CartDrawer() {
                 </div>
                 <div className="cart-item-right">
                   <div className="cart-item-price">
-                    MAD {lineTotalMad(item).toLocaleString('fr-FR')}
+                    {cartCurrency} {lineTotalMad(item).toLocaleString('fr-FR')}
                   </div>
-                  {currency !== 'MAD' && (
+                  {currency !== cartCurrency && (
                     <div className="cart-item-conv">
-                      ≈ {convertPrice(lineTotalMad(item), currency)}
+                      ≈ {convertPrice(lineTotalMad(item), currency, cartCurrency)}
                     </div>
                   )}
                   <button
@@ -133,11 +136,11 @@ export function CartDrawer() {
               <div>
                 <div className="cart-total-lbl">{t.total}</div>
                 <div className="cart-total-price">
-                  MAD {cartTotal.toLocaleString('fr-FR')}
+                  {cartCurrency} {cartTotal.toLocaleString('fr-FR')}
                 </div>
-                {currency !== 'MAD' && (
+                {currency !== cartCurrency && (
                   <div className="cart-total-conv">
-                    ≈ {convertPrice(cartTotal, currency)}
+                    ≈ {convertPrice(cartTotal, currency, cartCurrency)}
                   </div>
                 )}
               </div>
@@ -145,7 +148,7 @@ export function CartDrawer() {
             <div className="cart-acompte-note">
               💳{' '}
               <strong>
-                {t.depositLine} : MAD {acompte.toLocaleString('fr-FR')}
+                {t.depositLine} : {cartCurrency} {acompte.toLocaleString('fr-FR')}
               </strong>
               <br />
               {t.depositNote}

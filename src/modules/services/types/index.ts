@@ -42,6 +42,7 @@ export interface PublicServiceInfo {
 /** A bookable service as returned by the admin public catalog. */
 export interface PublicService {
   id: string;
+  tenantId: string;
   slug: string;
   type: ServiceType;
   title: string;

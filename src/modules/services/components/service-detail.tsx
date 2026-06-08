@@ -35,7 +35,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
   const img = resolveAssetUrl(photo);
   const thumb = resolveAssetUrl(service.thumbUrl ?? service.coverUrl);
 
-  const { addToCart, clearCart } = useCart();
+  const { cart, addToCart, clearCart } = useCart();
   const router = useRouter();
   const [tab, setTab] = useState(0);
   // One counter per service: number of people (per-person) or units (others).
@@ -89,6 +89,7 @@ export function ServiceDetail({ service }: { service: PublicService }) {
       currency: service.currency,
       booking: {
         serviceId: service.id,
+        tenantId: service.tenantId,
         // The single count drives the booking quantity; people = count for
         // per-person services (metadata for the concierge).
         people: needsPeople ? qty : undefined,
@@ -100,15 +101,31 @@ export function ServiceDetail({ service }: { service: PublicService }) {
     };
 
     if (checkout) {
-      // "Book now" = express checkout: the cart holds only this selection, so
-      // clicking it again just replaces it (never stacks duplicates).
+      // "Book now" = express checkout: the cart holds only this selection.
       clearCart();
       addToCart(item, qty, 'set');
       router.push('/panier');
-    } else {
-      // "Add to cart": same config merges into one line and bumps the quantity.
-      addToCart(item, qty, 'add');
+      return;
     }
+
+    // The cart holds ONE provider + ONE currency at a time, so the booking and
+    // totals stay valid. Adding a conflicting item starts a fresh cart.
+    const conflict = cart.some(
+      (c) =>
+        c.booking &&
+        (c.booking.tenantId !== service.tenantId || c.currency !== service.currency),
+    );
+    if (conflict) {
+      const ok = window.confirm(
+        locale === 'en'
+          ? 'Your cart has items from another provider or currency. Start a new cart with this item?'
+          : "Votre panier contient des articles d'un autre prestataire ou d'une autre devise. Démarrer un nouveau panier ?",
+      );
+      if (!ok) return;
+      clearCart();
+    }
+    // Same config merges into one line and bumps the quantity.
+    addToCart(item, qty, 'add');
   };
 
   return (

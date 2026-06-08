@@ -20,10 +20,12 @@ const qtyBtn: React.CSSProperties = {
  */
 export function CartLineConfig({
   booking,
+  currency = 'MAD',
   onChangeExtraQty,
   compact,
 }: {
   booking?: CartBooking;
+  currency?: string;
   onChangeExtraQty: (name: string, delta: number) => void;
   compact?: boolean;
 }) {
@@ -58,7 +60,7 @@ export function CartLineConfig({
             +
           </button>
           <span style={{ color: 'var(--gold)', minWidth: 64, textAlign: 'right' }}>
-            MAD {Math.round((e.priceCents * e.qty) / 100).toLocaleString('fr-FR')}
+            {currency} {Math.round((e.priceCents * e.qty) / 100).toLocaleString('fr-FR')}
           </span>
         </div>
       ))}

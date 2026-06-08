@@ -38,6 +38,8 @@ export function CartPage() {
     convertPrice,
   } = useCart();
   const acompte = Math.round(cartTotal * 0.3);
+  // The cart holds one provider → one currency.
+  const cartCurrency = (cart[0]?.currency ?? 'MAD') as Currency;
 
   const createBooking = useCreateBooking();
   const [name, setName] = useState('');
@@ -202,6 +204,7 @@ export function CartPage() {
                     <div className="panier-item-detail">{item.sub}</div>
                     <CartLineConfig
                       booking={item.booking}
+                      currency={cartCurrency}
                       onChangeExtraQty={(n, d) => changeExtraQty(item.id, n, d)}
                     />
                     <div className="panier-item-qty">
@@ -216,7 +219,7 @@ export function CartPage() {
                   </div>
                   <div className="panier-item-right">
                     <div className="panier-item-price">
-                      MAD {lineTotalMad(item).toLocaleString('fr-FR')}
+                      {cartCurrency} {lineTotalMad(item).toLocaleString('fr-FR')}
                     </div>
                     <button className="panier-item-del" onClick={() => removeFromCart(item.id)}>
                       {t.remove}
@@ -249,21 +252,21 @@ export function CartPage() {
                   <span>
                     {item.name} ×{item.qty}
                   </span>
-                  <span>MAD {lineTotalMad(item).toLocaleString('fr-FR')}</span>
+                  <span>{cartCurrency} {lineTotalMad(item).toLocaleString('fr-FR')}</span>
                 </div>
               ))}
               <div className="panier-sum-row total">
                 <span>{t.total}</span>
-                <span>MAD {cartTotal.toLocaleString('fr-FR')}</span>
+                <span>{cartCurrency} {cartTotal.toLocaleString('fr-FR')}</span>
               </div>
-              {currency !== 'MAD' && (
+              {currency !== cartCurrency && (
                 <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                  ≈ {convertPrice(cartTotal, currency)}
+                  ≈ {convertPrice(cartTotal, currency, cartCurrency)}
                 </div>
               )}
               <div className="panier-acompte-box">
                 <div className="panier-acompte-val">
-                  MAD {acompte.toLocaleString('fr-FR')}
+                  {cartCurrency} {acompte.toLocaleString('fr-FR')}
                 </div>
                 <div className="panier-acompte-lbl">{t.depositLbl}</div>
                 <p className="panier-acompte-note">{t.depositNote}</p>

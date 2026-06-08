@@ -3,6 +3,8 @@
 /** Real booking payload carried by a cart line (sent to the admin at checkout). */
 export interface CartBooking {
   serviceId: string;
+  /** Provider that owns the service — the cart holds one provider at a time. */
+  tenantId: string;
   people?: number;
   /** Chosen package (undefined = the Base package). */
   optionName?: string;
