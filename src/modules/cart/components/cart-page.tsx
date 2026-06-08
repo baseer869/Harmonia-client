@@ -37,15 +37,7 @@ export function CartPage() {
     cartTotal,
     convertPrice,
   } = useCart();
-  // Multi-vendor cart: totals are grouped by currency (providers may differ).
-  const totalsByCurrency = cart.reduce<Record<string, number>>((acc, i) => {
-    const c = i.currency ?? 'MAD';
-    acc[c] = (acc[c] ?? 0) + lineTotalMad(i);
-    return acc;
-  }, {});
-  const currencyList = Object.keys(totalsByCurrency);
-  const singleCurrency = currencyList.length === 1;
-  const baseCur = (currencyList[0] ?? 'MAD') as Currency;
+  const acompte = Math.round(cartTotal * 0.3);
 
   const createBooking = useCreateBooking();
   const [name, setName] = useState('');
@@ -186,7 +178,6 @@ export function CartPage() {
                     <div className="panier-item-detail">{item.sub}</div>
                     <CartLineConfig
                       booking={item.booking}
-                      currency={item.currency ?? 'MAD'}
                       onChangeExtraQty={(n, d) => changeExtraQty(item.id, n, d)}
                     />
                     <div className="panier-item-qty">
@@ -201,7 +192,7 @@ export function CartPage() {
                   </div>
                   <div className="panier-item-right">
                     <div className="panier-item-price">
-                      {item.currency ?? 'MAD'} {lineTotalMad(item).toLocaleString('fr-FR')}
+                      MAD {lineTotalMad(item).toLocaleString('fr-FR')}
                     </div>
                     <button className="panier-item-del" onClick={() => removeFromCart(item.id)}>
                       {t.remove}
@@ -234,28 +225,21 @@ export function CartPage() {
                   <span>
                     {item.name} ×{item.qty}
                   </span>
-                  <span>{item.currency ?? 'MAD'} {lineTotalMad(item).toLocaleString('fr-FR')}</span>
+                  <span>MAD {lineTotalMad(item).toLocaleString('fr-FR')}</span>
                 </div>
               ))}
-              {currencyList.map((cur) => (
-                <div key={cur} className="panier-sum-row total">
-                  <span>
-                    {t.total}
-                    {!singleCurrency ? ` (${cur})` : ''}
-                  </span>
-                  <span>{cur} {totalsByCurrency[cur]!.toLocaleString('fr-FR')}</span>
-                </div>
-              ))}
-              {singleCurrency && currency !== baseCur && (
+              <div className="panier-sum-row total">
+                <span>{t.total}</span>
+                <span>MAD {cartTotal.toLocaleString('fr-FR')}</span>
+              </div>
+              {currency !== 'MAD' && (
                 <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                  ≈ {convertPrice(totalsByCurrency[baseCur]!, currency, baseCur)}
+                  ≈ {convertPrice(cartTotal, currency)}
                 </div>
               )}
               <div className="panier-acompte-box">
                 <div className="panier-acompte-val">
-                  {currencyList
-                    .map((cur) => `${cur} ${Math.round(totalsByCurrency[cur]! * 0.3).toLocaleString('fr-FR')}`)
-                    .join(' · ')}
+                  MAD {acompte.toLocaleString('fr-FR')}
                 </div>
                 <div className="panier-acompte-lbl">{t.depositLbl}</div>
                 <p className="panier-acompte-note">{t.depositNote}</p>

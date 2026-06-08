@@ -31,7 +31,7 @@ interface CartCtx {
   setCurrency: (c: Currency) => void;
   openCart: () => void;
   closeCart: () => void;
-  convertPrice: (amount: number, to: Currency, from?: Currency) => string;
+  convertPrice: (mad: number, cur: Currency) => string;
 }
 
 /**
@@ -135,10 +135,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
 
-  // Convert an amount expressed in `from` currency into `to` (display only).
-  const convertPrice = useCallback((amount: number, to: Currency, from: Currency = 'MAD'): string => {
-    const val = amount * ((RATES[to] ?? 1) / (RATES[from] ?? 1));
-    return `${SYMBOLS[to]} ${to === 'MAD' ? val.toLocaleString('fr-FR') : val.toFixed(0)}`;
+  const convertPrice = useCallback((mad: number, cur: Currency): string => {
+    const val = mad * RATES[cur];
+    return `${SYMBOLS[cur]} ${cur === 'MAD' ? val.toLocaleString('fr-FR') : val.toFixed(0)}`;
   }, []);
 
   // Floating-button badge = number of packages (cart lines), NOT the people /
